@@ -1,0 +1,133 @@
+import { useState } from 'react'
+import { X, Trash2, Send } from 'lucide-react'
+import type { NewsPost } from '@/pages/NewsPage'
+
+const PRIMARY = '#243d20'
+
+interface Props {
+  post: NewsPost | null
+  currentUser: string
+  onClose: () => void
+  onAddComment: (postId: string, text: string) => void
+  onDeleteComment: (postId: string, commentId: string) => void
+}
+
+function timeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+export default function NewsCommentsSheet({
+  post,
+  currentUser,
+  onClose,
+  onAddComment,
+  onDeleteComment,
+}: Props) {
+  const [text, setText] = useState('')
+
+  function handleSend() {
+    if (!text.trim() || !post) return
+    onAddComment(post.id, text.trim())
+    setText('')
+  }
+
+  const open = !!post
+  const isCreator = post?.author === currentUser
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+        style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none' }}
+        onClick={onClose}
+      />
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
+        style={{ height: '75vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+      >
+        <div className="flex justify-center pt-3">
+          <div className="w-10 h-1 bg-gray-300 rounded-full" />
+        </div>
+
+        <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100 flex-shrink-0">
+          <h2 className="text-base font-bold text-gray-900">
+            Comments {post && post.comments.length > 0 && `(${post.comments.length})`}
+          </h2>
+          <button onClick={onClose} className="p-1 text-gray-400"><X size={20} /></button>
+        </div>
+
+        {isCreator && (
+          <p className="px-6 py-2 text-xs text-gray-400 bg-gray-50 flex-shrink-0">
+            You can remove any comment on your post.
+          </p>
+        )}
+
+        {/* Comment list */}
+        <div className="flex-1 overflow-y-auto px-6 py-3 space-y-3">
+          {post && post.comments.length === 0 && (
+            <p className="text-sm text-gray-400 text-center py-8">
+              No comments yet. Be the first to comment!
+            </p>
+          )}
+          {post?.comments.map((c) => (
+            <div key={c.id} className="flex gap-3 group">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-white font-bold text-xs"
+                style={{ backgroundColor: PRIMARY }}
+              >
+                {c.author.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-semibold text-gray-900">{c.author}</span>
+                  <span className="text-xs text-gray-400">{timeAgo(c.createdAt)}</span>
+                </div>
+                <p className="text-sm text-gray-700 mt-0.5 leading-relaxed">{c.text}</p>
+              </div>
+              {isCreator && (
+                <button
+                  onClick={() => post && onDeleteComment(post.id, c.id)}
+                  className="text-gray-300 p-1 self-start flex-shrink-0 opacity-0 group-hover:opacity-100 active:opacity-100"
+                  aria-label="Delete comment"
+                >
+                  <Trash2 size={15} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Input row */}
+        <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 flex gap-2 items-end">
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Write a comment…"
+            rows={1}
+            className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700 resize-none"
+            style={{ maxHeight: '96px' }}
+            onInput={(e) => {
+              const el = e.currentTarget
+              el.style.height = 'auto'
+              el.style.height = el.scrollHeight + 'px'
+            }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={!text.trim()}
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-opacity disabled:opacity-40"
+            style={{ backgroundColor: PRIMARY }}
+          >
+            <Send size={16} color="white" />
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
