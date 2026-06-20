@@ -23,6 +23,11 @@ async function fetchNameMap(uids: string[]): Promise<Record<string, string>> {
   return Object.fromEntries((data ?? []).map((p) => [p.id, p.full_name]))
 }
 
+async function getSessionUser() {
+  const { data: { session } } = await supabase.auth.getSession()
+  return session?.user ?? null
+}
+
 type MessagesStore = {
   threads:      MessageThread[]
   loading:      boolean
@@ -37,10 +42,9 @@ export const useMessagesStore = create<MessagesStore>()((set) => ({
 
   fetchThreads: async () => {
     set({ loading: true })
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getSessionUser()
     if (!user) { set({ loading: false }); return }
 
-    // Get thread IDs where current user is a participant
     const { data: myParticipations } = await supabase
       .from('message_participants')
       .select('thread_id')
@@ -49,7 +53,6 @@ export const useMessagesStore = create<MessagesStore>()((set) => ({
     const threadIds = (myParticipations ?? []).map((p) => p.thread_id)
     if (!threadIds.length) { set({ threads: [], loading: false }); return }
 
-    // Fetch threads, all participants, all messages in parallel
     const [{ data: threadRows }, { data: partRows }, { data: msgRows }] = await Promise.all([
       supabase.from('message_threads').select('*').in('id', threadIds).order('updated_at', { ascending: false }),
       supabase.from('message_participants').select('thread_id, user_id').in('thread_id', threadIds),
@@ -88,10 +91,9 @@ export const useMessagesStore = create<MessagesStore>()((set) => ({
   },
 
   startThread: async (subject, to, _from, text) => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getSessionUser()
     if (!user) return
 
-    // Look up recipient UUID by display name
     const { data: recipientProfile } = await supabase
       .from('profiles')
       .select('id, full_name')
@@ -100,24 +102,13 @@ export const useMessagesStore = create<MessagesStore>()((set) => ({
 
     if (!recipientProfile) return
 
-    const { data: thread } = await supabase
-      .from('message_threads')
-      .insert({ subject, created_by: user.id })
-      .select()
-      .single()
-
-    if (!thread) return
-
-    // Participants must exist before inserting the first message (RLS check)
-    await supabase.from('message_participants').insert([
-      { thread_id: thread.id, user_id: user.id },
-      { thread_id: thread.id, user_id: recipientProfile.id },
-    ])
-    await supabase.from('message_items').insert({
-      thread_id: thread.id,
-      from_id: user.id,
-      text,
+    const { data: thread, error } = await supabase.rpc('start_message_thread', {
+      p_subject: subject,
+      p_to_user_id: recipientProfile.id,
+      p_text: text,
     })
+
+    if (error || !thread) { console.error('startThread rpc error', error); return }
 
     const { data: senderProfile } = await supabase
       .from('profiles')
@@ -144,7 +135,7 @@ export const useMessagesStore = create<MessagesStore>()((set) => ({
   },
 
   reply: async (threadId, from, text) => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getSessionUser()
     if (!user) return
 
     const { data: msgRow } = await supabase

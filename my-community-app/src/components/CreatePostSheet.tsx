@@ -47,8 +47,8 @@ export default function CreatePostSheet({ open, onClose, onSave }: Props) {
         onClick={handleClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
-        style={{ maxHeight: '70vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
+        style={{ maxHeight: '85vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="flex justify-center pt-3">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />

@@ -11,9 +11,9 @@ const PRIMARY = '#243d20'
 
 const PASS_TYPES: { value: PassType; label: string }[] = [
   { value: 'visitor', label: 'Visitor Pass' },
-  { value: 'worker',  label: 'Worker Pass' },
-  { value: 'event',   label: 'Event Pass' },
-  { value: 'other',   label: 'Other' },
+  { value: 'worker', label: 'Worker Pass' },
+  { value: 'event', label: 'Event Pass' },
+  { value: 'other', label: 'Other' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -35,24 +35,24 @@ function passStatus(pass: GatePass): PassDisplayStatus {
   }
   const today = new Date().toISOString().slice(0, 10)
   if (today > pass.departureDate) return 'expired'
-  if (today < pass.arrivalDate)   return 'upcoming'
+  if (today < pass.arrivalDate) return 'upcoming'
   return 'active'
 }
 
 function buildShareUrl(pass: GatePass): string {
   // Only include fields PassSharePage actually uses — exclude id, email, idPhotoUrl
   const payload = {
-    passCode:       pass.passCode,
-    type:           pass.type,
-    reason:         pass.reason,
-    visitorName:    pass.visitorName,
-    phone:          pass.phone,
-    visitingLot:    pass.visitingLot,
-    extended:       pass.extended,
-    arrivalDate:    pass.arrivalDate,
-    departureDate:  pass.departureDate,
-    createdBy:      pass.createdBy,
-    createdAt:      pass.createdAt,
+    passCode: pass.passCode,
+    type: pass.type,
+    reason: pass.reason,
+    visitorName: pass.visitorName,
+    phone: pass.phone,
+    visitingLot: pass.visitingLot,
+    extended: pass.extended,
+    arrivalDate: pass.arrivalDate,
+    departureDate: pass.departureDate,
+    createdBy: pass.createdBy,
+    createdAt: pass.createdAt,
     approvalStatus: pass.approvalStatus,
   }
   return `${window.location.origin}/pass?v=${btoa(JSON.stringify(payload))}`
@@ -78,7 +78,7 @@ function shareWhatsApp(pass: GatePass) {
 // ── Pass card ──────────────────────────────────────────────────────────────────
 
 function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
-  const cfg    = PASS_TYPE_CONFIG[pass.type]
+  const cfg = PASS_TYPE_CONFIG[pass.type]
   const status = passStatus(pass)
   const isPending = pass.extended && pass.approvalStatus === 'pending'
   const hoursLeft = isPending
@@ -86,11 +86,11 @@ function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
     : 0
 
   const STATUS_STYLES: Record<PassDisplayStatus, { bg: string; color: string; label: string }> = {
-    active:           { bg: '#d1fae5', color: '#065f46', label: 'Active' },
-    upcoming:         { bg: '#dbeafe', color: '#1e40af', label: 'Upcoming' },
-    expired:          { bg: '#f3f4f6', color: '#6b7280', label: 'Expired' },
+    active: { bg: '#d1fae5', color: '#065f46', label: 'Active' },
+    upcoming: { bg: '#dbeafe', color: '#1e40af', label: 'Upcoming' },
+    expired: { bg: '#f3f4f6', color: '#6b7280', label: 'Expired' },
     pending_approval: { bg: '#fef3c7', color: '#92400e', label: 'Pending Approval' },
-    declined:         { bg: '#fee2e2', color: '#991b1b', label: 'Declined' },
+    declined: { bg: '#fee2e2', color: '#991b1b', label: 'Declined' },
   }
   const statusStyle = isPending
     ? STATUS_STYLES.pending_approval
@@ -98,8 +98,7 @@ function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
   const canShare = status !== 'declined' && status !== 'expired'
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex">
-      <div className="w-1.5 flex-shrink-0" style={{ backgroundColor: cfg.color }} />
+    <div className="bg-white rounded-2xl border border-gray-300 overflow-hidden flex">
       <div className="flex-1 p-4 min-w-0">
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <p className="text-base font-bold text-gray-900 leading-snug">{pass.visitorName}</p>
@@ -156,8 +155,8 @@ function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
 // ── Pass detail view ───────────────────────────────────────────────────────────
 
 function PassDetailView({ pass, onClose }: { pass: GatePass; onClose: () => void }) {
-  const cfg      = PASS_TYPE_CONFIG[pass.type]
-  const status   = passStatus(pass)
+  const cfg = PASS_TYPE_CONFIG[pass.type]
+  const status = passStatus(pass)
   const shareUrl = buildShareUrl(pass)
   const [copied, setCopied] = useState(false)
 
@@ -170,7 +169,7 @@ function PassDetailView({ pass, onClose }: { pass: GatePass; onClose: () => void
   return (
     <div className="fixed inset-0 z-30 bg-white flex flex-col safe-top">
       <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
-        <button onClick={onClose} className="p-1 -ml-1"><ArrowLeft size={22} color="#111" /></button>
+        <button onClick={onClose} className="p-1 -ml-1"><ArrowLeft size={32} color="#111" /></button>
         <p className="text-base font-bold text-gray-900 flex-1">Pass Details</p>
         {status === 'expired' && (
           <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Expired</span>
@@ -179,7 +178,7 @@ function PassDetailView({ pass, onClose }: { pass: GatePass; onClose: () => void
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {/* Styled pass card */}
-        <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+        <div className="rounded-2xl overflow-hidden border border-gray-400 shadow-sm">
           <div className="px-5 py-4 text-white" style={{ backgroundColor: PRIMARY }}>
             <p className="text-[10px] font-bold tracking-widest opacity-60">PURA MARACAY · ECOVILLA</p>
             <p className="text-xl font-black mt-0.5 tracking-wide">GATE PASS</p>
@@ -266,16 +265,16 @@ function CreatePassSheet({
   const { createPass } = useGateStore()
   const todayStr = new Date().toISOString().slice(0, 10)
 
-  const [type,      setType]      = useState<PassType>('visitor')
-  const [reason,    setReason]    = useState<PassReason>('family')
-  const [name,      setName]      = useState('')
-  const [email,     setEmail]     = useState('')
-  const [phone,     setPhone]     = useState('')
-  const [lot,       setLot]       = useState('1')
-  const [extended,  setExtended]  = useState(false)
-  const [arrival,   setArrival]   = useState(todayStr)
+  const [type, setType] = useState<PassType>('visitor')
+  const [reason, setReason] = useState<PassReason>('family')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [lot, setLot] = useState('1')
+  const [extended, setExtended] = useState(false)
+  const [arrival, setArrival] = useState(todayStr)
   const [departure, setDeparture] = useState(todayStr)
-  const [idPhoto,   setIdPhoto]   = useState('')
+  const [idPhoto, setIdPhoto] = useState('')
 
   function reset() {
     setType('visitor'); setReason('family'); setName(''); setEmail(''); setPhone('')
@@ -317,8 +316,8 @@ function CreatePassSheet({
         onClick={handleClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
-        style={{ maxHeight: '70vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto  shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
+        style={{ maxHeight: '85vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="flex justify-center pt-3 flex-shrink-0">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -500,8 +499,8 @@ function CreatePassSheet({
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function GatePage() {
-  const navigate    = useNavigate()
-  const user        = useAuthStore((s) => s.user)
+  const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
   const currentUser = getDisplayName(user)
   const { passes, fetchPasses } = useGateStore()
 
@@ -529,7 +528,7 @@ export default function GatePage() {
         {/* Top bar */}
         <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
           <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Back">
-            <ArrowLeft size={22} color="#111" />
+            <ArrowLeft size={32} color="#111" />
           </button>
         </div>
 
@@ -543,7 +542,7 @@ export default function GatePage() {
             className="w-full py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 mb-6 transition-opacity active:opacity-80"
             style={{ backgroundColor: PRIMARY }}
           >
-            <Plus size={16} /> Create Pass
+            <Plus size={19} /> Create Pass
           </button>
 
           {/* Passes */}

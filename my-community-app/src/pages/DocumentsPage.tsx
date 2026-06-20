@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Upload, User, Eye, Calendar, Trash2, FileText, Clock } from 'lucide-react'
+import { ArrowLeft, Upload, User, Eye, Calendar, Trash2, FileText, CheckCircle } from 'lucide-react'
 import { useAuthStore, getDisplayName, getRole } from '@/store/authStore'
 import UploadDocumentSheet, {
   FOLDERS, FOLDER_COLORS,
@@ -51,7 +51,7 @@ function DocCard({
   onDelete: (id: string) => void
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-2.5">
+    <div className="bg-white rounded-2xl border border-gray-400 p-4 space-y-2.5">
 
       <h2 className="text-base font-bold text-gray-900 leading-snug">{doc.title}</h2>
 
@@ -77,13 +77,6 @@ function DocCard({
         </span>
       </div>
 
-      {/* Pending badge */}
-      {doc.status === 'pending' && (
-        <div className="flex items-center gap-1.5 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
-          <Clock size={14} className="text-amber-600 flex-shrink-0" />
-          <p className="text-xs text-amber-700 font-medium">Pending admin approval</p>
-        </div>
-      )}
 
       {/* View button */}
       <button
@@ -114,12 +107,14 @@ function DocCard({
 export default function DocumentsPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
+  const isAdmin = useAuthStore((s) => s.isAdmin)
   const displayName = getDisplayName(user)
   const isOwner = getRole(user) === 'owner'
   const isRenter = !isOwner
 
   const [docs, setDocs] = useState<CommunityDoc[]>([])
   const [uploadOpen, setUploadOpen] = useState(false)
+  const [uploadedPending, setUploadedPending] = useState(false)
   const [titleFilter, setTitleFilter] = useState('')
   const [folderFilter, setFolderFilter] = useState('')
 
@@ -128,6 +123,7 @@ export default function DocumentsPage() {
       const { data: rows } = await supabase
         .from('documents')
         .select('*')
+        .eq('status', 'approved')
         .order('uploaded_at', { ascending: false })
       if (!rows) return
 
@@ -135,24 +131,22 @@ export default function DocumentsPage() {
       const nameMap = await fetchNameMap(uids)
 
       setDocs(rows.map((r) => ({
-        id:         r.id,
-        title:      r.title,
-        folder:     r.folder as DocFolder,
-        access:     r.access as DocAccess,
-        status:     r.status as DocStatus,
+        id: r.id,
+        title: r.title,
+        folder: r.folder as DocFolder,
+        access: r.access as DocAccess,
+        status: r.status as DocStatus,
         uploadedBy: nameMap[r.uploaded_by] ?? 'Unknown',
         uploadedAt: r.uploaded_at,
-        fileUrl:    r.file_url,
-        filePath:   r.file_path,
+        fileUrl: r.file_url,
+        filePath: r.file_path,
       })))
     }
     load()
   }, [])
 
-  // Visibility: owners_only hidden from renters; pending hidden from non-uploaders
   const visibleDocs = docs.filter((doc) => {
     if (doc.access === 'owners_only' && isRenter) return false
-    if (doc.status === 'pending' && doc.uploadedBy !== displayName && !isOwner) return false
     if (titleFilter && !doc.title.toLowerCase().includes(titleFilter.toLowerCase())) return false
     if (folderFilter && doc.folder !== folderFilter) return false
     return true
@@ -162,7 +156,7 @@ export default function DocumentsPage() {
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) return
 
-    const ext  = data.file.name.split('.').pop() ?? 'pdf'
+    const ext = data.file.name.split('.').pop() ?? 'pdf'
     const path = `${authUser.id}/${Date.now()}.${ext}`
 
     const { error: uploadError } = await supabase.storage
@@ -176,29 +170,20 @@ export default function DocumentsPage() {
     const { data: row } = await supabase
       .from('documents')
       .insert({
-        title:       data.title,
-        folder:      data.folder,
-        access:      data.access,
-        status:      'pending',
+        title: data.title,
+        folder: data.folder,
+        access: data.access,
+        status: 'pending',
         uploaded_by: authUser.id,
-        file_url:    publicUrl,
-        file_path:   path,
+        file_url: publicUrl,
+        file_path: path,
       })
       .select()
       .single()
 
     if (!row) return
-    setDocs((prev) => [{
-      id:         row.id,
-      title:      row.title,
-      folder:     row.folder as DocFolder,
-      access:     row.access as DocAccess,
-      status:     'pending',
-      uploadedBy: displayName,
-      uploadedAt: row.uploaded_at,
-      fileUrl:    row.file_url,
-      filePath:   row.file_path,
-    }, ...prev])
+    setUploadedPending(true)
+    setTimeout(() => setUploadedPending(false), 5000)
   }
 
   async function handleView(doc: CommunityDoc) {
@@ -235,11 +220,11 @@ export default function DocumentsPage() {
       {/* Top bar */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
         <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Back">
-          <ArrowLeft size={22} color="#111" />
+          <ArrowLeft size={32} color="#111" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pt-1 pb-6">
 
         {/* Header */}
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Community Documents</h1>
@@ -258,8 +243,15 @@ export default function DocumentsPage() {
           </button>
         </div>
 
+        {uploadedPending && (
+          <div className="flex items-center gap-2.5 px-4 py-3 mb-4 rounded-xl bg-green-50 border border-green-200">
+            <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
+            <p className="text-sm text-green-700 font-medium">Document submitted — it will appear here once approved by an admin.</p>
+          </div>
+        )}
+
         {/* Filters */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-5 space-y-3">
+        <div className="bg-white rounded-2xl border border-gray-400 p-4 mb-5 space-y-3">
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Filter by Title:</label>
             <input
@@ -297,7 +289,7 @@ export default function DocumentsPage() {
               <DocCard
                 key={doc.id}
                 doc={doc}
-                canDelete={isOwner && doc.uploadedBy === displayName}
+                canDelete={isAdmin || (isOwner && doc.uploadedBy === displayName)}
                 onView={handleView}
                 onDelete={handleDelete}
               />

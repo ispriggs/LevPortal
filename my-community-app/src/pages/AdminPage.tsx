@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Check, X, Send, MessageSquare,
   FileText, UserPlus, ClipboardList, Ticket as TicketIcon,
-  AlertCircle, Eye, ExternalLink, QrCode,
+  AlertCircle, Eye, ExternalLink, QrCode, Megaphone, Trash2,
 } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
@@ -38,6 +38,8 @@ type PendingSignup = {
 }
 type AdminProposal = {
   id: string; category: string; title: string; description: string
+  supporters: string; problemSolution: string; implementationTeam: string
+  implementationPlan: string; timeline: string; longTermManagement: string; costs: string
   photoUrl?: string; submittedBy: string; submittedAt: string
   status: 'pending' | 'approved' | 'rejected'
   comments: ProposalComment[]
@@ -406,7 +408,7 @@ function TicketManageView({
   return (
     <div className="fixed inset-0 z-[35] bg-white flex flex-col safe-top">
       <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
-        <button onClick={onBack} className="p-1 -ml-1"><ArrowLeft size={22} color="#111" /></button>
+        <button onClick={onBack} className="p-1 -ml-1"><ArrowLeft size={32} color="#111" /></button>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold text-gray-400">{live.ticketNumber}</p>
           <p className="text-sm font-bold text-gray-900 truncate">{live.subject}</p>
@@ -516,8 +518,10 @@ function ProposalManageView({
 
   return (
     <div className="fixed inset-0 z-[35] bg-white flex flex-col safe-top">
+
+      {/* Top bar */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
-        <button onClick={onBack} className="p-1 -ml-1"><ArrowLeft size={22} color="#111" /></button>
+        <button onClick={onBack} className="p-1 -ml-1"><ArrowLeft size={32} color="#111" /></button>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{live.category}</p>
           <p className="text-sm font-bold text-gray-900 truncate">{live.title}</p>
@@ -527,14 +531,14 @@ function ProposalManageView({
         </button>
       </div>
 
-      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0 space-y-1.5">
-        <div className="flex flex-wrap gap-2">
+      {/* Status strip + approve/reject */}
+      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0 space-y-2">
+        <div className="flex items-center justify-between">
           <StatusBadge status={live.status} />
+          <p className="text-xs text-gray-400">By {live.submittedBy} · {fmt(live.submittedAt)}</p>
         </div>
-        <p className="text-sm text-gray-700 leading-relaxed">{live.description}</p>
-        <p className="text-xs text-gray-400">By {live.submittedBy} · {fmt(live.submittedAt)}</p>
         {live.status === 'pending' && (
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-2">
             <button
               onClick={() => { onApprove(live.id); onBack() }}
               className="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-1.5"
@@ -552,39 +556,69 @@ function ProposalManageView({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {live.comments.length === 0 && (
-          <p className="text-xs text-gray-400 text-center py-6">No comments yet on this proposal.</p>
+      {/* Scrollable body: full proposal + comments */}
+      <div className="flex-1 overflow-y-auto">
+
+        {live.photoUrl && (
+          <img src={live.photoUrl} alt="" className="w-full object-cover max-h-56" />
         )}
-        {live.comments.map((c) => {
-          const isAdmin = c.author === adminName
-          return (
-            <div key={c.id} className={`flex ${isAdmin ? 'justify-start' : 'justify-end'}`}>
-              <div className="max-w-[80%]">
-                {isAdmin && <p className="text-xs text-gray-400 mb-1 ml-1">You (Admin)</p>}
-                <div
-                  className="px-4 py-2.5 rounded-2xl text-sm leading-relaxed"
-                  style={isAdmin
-                    ? { backgroundColor: PRIMARY, color: 'white', borderBottomLeftRadius: 4 }
-                    : { backgroundColor: '#f3f4f6', color: '#111827', borderBottomRightRadius: 4 }}
-                >
-                  {c.text}
-                </div>
-                <p className={`text-[10px] text-gray-400 mt-1 ${isAdmin ? 'ml-1' : 'text-right mr-1'}`}>
-                  {c.author} · {fmt(c.createdAt)}
-                </p>
-              </div>
+
+        {/* Proposal fields */}
+        <div className="px-4 py-4 space-y-5 border-b border-gray-100">
+          {([
+            { label: 'Description',          value: live.description },
+            { label: 'Supporters',           value: live.supporters },
+            { label: 'Problem & Solution',   value: live.problemSolution },
+            { label: 'Implementation Team',  value: live.implementationTeam },
+            { label: 'Implementation Plan',  value: live.implementationPlan },
+            { label: 'Timeline',             value: live.timeline },
+            { label: 'Long-term Management', value: live.longTermManagement },
+            { label: 'Costs',                value: live.costs },
+          ] as { label: string; value: string }[]).filter(({ value }) => value).map(({ label, value }) => (
+            <div key={label}>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{label}</p>
+              <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{value}</p>
             </div>
-          )
-        })}
+          ))}
+        </div>
+
+        {/* Admin notes / comments */}
+        <div className="px-4 py-4 space-y-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Admin Notes</p>
+          {live.comments.length === 0 && (
+            <p className="text-xs text-gray-400 py-4 text-center">No notes yet on this proposal.</p>
+          )}
+          {live.comments.map((c) => {
+            const isAdminComment = c.author === adminName
+            return (
+              <div key={c.id} className={`flex ${isAdminComment ? 'justify-start' : 'justify-end'}`}>
+                <div className="max-w-[80%]">
+                  {isAdminComment && <p className="text-xs text-gray-400 mb-1 ml-1">You (Admin)</p>}
+                  <div
+                    className="px-4 py-2.5 rounded-2xl text-sm leading-relaxed"
+                    style={isAdminComment
+                      ? { backgroundColor: PRIMARY, color: 'white', borderBottomLeftRadius: 4 }
+                      : { backgroundColor: '#f3f4f6', color: '#111827', borderBottomRightRadius: 4 }}
+                  >
+                    {c.text}
+                  </div>
+                  <p className={`text-[10px] text-gray-400 mt-1 ${isAdminComment ? 'ml-1' : 'text-right mr-1'}`}>
+                    {c.author} · {fmt(c.createdAt)}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
+      {/* Comment input footer */}
       <div className="flex-shrink-0 px-4 py-4 border-t border-gray-100 safe-bottom">
         <div className="flex gap-2 items-end">
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Add a comment on this proposal…"
+            placeholder="Add a note on this proposal…"
             rows={2}
             className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
           />
@@ -598,6 +632,7 @@ function ProposalManageView({
           </button>
         </div>
       </div>
+
     </div>
   )
 }
@@ -658,7 +693,7 @@ function ExtendedPassCard({
 
 // ── Main page ─────────────────────────────────────────────────────────────
 
-type Tab = 'docs' | 'signups' | 'proposals' | 'tickets' | 'passes'
+type Tab = 'docs' | 'signups' | 'proposals' | 'tickets' | 'passes' | 'announcements'
 
 export default function AdminPage() {
   const navigate = useNavigate()
@@ -680,6 +715,11 @@ export default function AdminPage() {
   const [docs, setDocs] = useState<PendingDoc[]>([])
   const [signups, setSignups] = useState<PendingSignup[]>([])
   const [proposals, setProposals] = useState<AdminProposal[]>([])
+  const [announcements, setAnnouncements] = useState<{ id: string; title: string; body: string | null; created_at: string; expires_at: string }[]>([])
+  const [annTitle, setAnnTitle] = useState('')
+  const [annBody, setAnnBody] = useState('')
+  const [annExpiry, setAnnExpiry] = useState('')
+  const [annPosting, setAnnPosting] = useState(false)
 
   const loadDocs = useCallback(async () => {
     const { data: rows } = await supabase
@@ -753,6 +793,13 @@ export default function AdminPage() {
       category: r.category,
       title: r.title,
       description: r.description,
+      supporters: r.supporters ?? '',
+      problemSolution: r.problem_solution ?? '',
+      implementationTeam: r.implementation_team ?? '',
+      implementationPlan: r.implementation_plan ?? '',
+      timeline: r.timeline ?? '',
+      longTermManagement: r.long_term_management ?? '',
+      costs: r.costs ?? '',
       photoUrl: r.photo_url ?? undefined,
       submittedBy: nameMap[r.created_by] ?? 'Unknown',
       submittedAt: r.created_at,
@@ -761,12 +808,42 @@ export default function AdminPage() {
     })))
   }, [])
 
+  const loadAnnouncements = useCallback(async () => {
+    await supabase.from('announcements').delete().lt('expires_at', new Date().toISOString())
+    const { data } = await supabase
+      .from('announcements')
+      .select('id, title, body, created_at, expires_at')
+      .order('created_at', { ascending: false })
+    if (data) setAnnouncements(data)
+  }, [])
+
+  async function postAnnouncement() {
+    if (!annTitle.trim() || !annExpiry) return
+    setAnnPosting(true)
+    await supabase.from('announcements').insert({
+      title: annTitle.trim(),
+      body: annBody.trim() || null,
+      expires_at: new Date(annExpiry + 'T23:59:59').toISOString(),
+    })
+    setAnnTitle('')
+    setAnnBody('')
+    setAnnExpiry('')
+    setAnnPosting(false)
+    loadAnnouncements()
+  }
+
+  async function deleteAnnouncement(id: string) {
+    await supabase.from('announcements').delete().eq('id', id)
+    setAnnouncements((prev) => prev.filter((a) => a.id !== id))
+  }
+
   useEffect(() => {
     fetchTickets()
     fetchPasses()
     loadDocs()
     loadSignups()
     loadProposals()
+    loadAnnouncements()
   }, [])
 
   // Sheet state
@@ -812,9 +889,10 @@ export default function AdminPage() {
     setMsgSheet({ to: p.submittedBy, subject: `Re: Proposal not approved — ${p.title}` })
   }
   async function addProposalComment(proposalId: string, text: string) {
+    if (!user?.id) return
     const { data: row } = await supabase
       .from('proposal_comments')
-      .insert({ proposal_id: proposalId, text, author: adminName })
+      .insert({ proposal_id: proposalId, author_id: user.id, text })
       .select()
       .single()
     if (!row) return
@@ -840,6 +918,7 @@ export default function AdminPage() {
     { id: 'proposals', label: 'Proposals', icon: ClipboardList, count: pendingProposals },
     { id: 'tickets', label: 'Tickets', icon: TicketIcon, count: openTickets },
     { id: 'passes', label: 'Passes', icon: QrCode, count: pendingPasses },
+    { id: 'announcements', label: 'Announcements', icon: Megaphone, count: 0 },
   ]
 
   return (
@@ -848,7 +927,7 @@ export default function AdminPage() {
       {/* Top bar */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
         <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Back">
-          <ArrowLeft size={22} color="#111" />
+          <ArrowLeft size={32} color="#111" />
         </button>
       </div>
 
@@ -934,6 +1013,81 @@ export default function AdminPage() {
                 <AdminTicketCard key={t.id} ticket={t} onManage={() => setManagingTicket(t)} />
               ))}
           </>
+        )}
+
+        {activeTab === 'announcements' && (
+          <div className="space-y-4">
+            {/* Create form */}
+            <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+              <p className="text-sm font-bold text-gray-700">New Announcement</p>
+              <input
+                type="text"
+                value={annTitle}
+                onChange={(e) => setAnnTitle(e.target.value)}
+                placeholder="Title *"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 outline-none focus:border-green-700"
+              />
+              <textarea
+                value={annBody}
+                onChange={(e) => setAnnBody(e.target.value)}
+                placeholder="Body (optional)"
+                rows={3}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 outline-none focus:border-green-700 resize-none"
+              />
+              <div>
+                <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2">Expires On *</p>
+                <input
+                  type="date"
+                  value={annExpiry}
+                  min={new Date().toISOString().split('T')[0]}
+                  onChange={(e) => setAnnExpiry(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 outline-none focus:border-green-700"
+                />
+              </div>
+              <button
+                onClick={postAnnouncement}
+                disabled={annPosting || !annTitle.trim() || !annExpiry}
+                className="w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-40"
+                style={{ backgroundColor: PRIMARY }}
+              >
+                <Megaphone size={15} />
+                {annPosting ? 'Posting…' : 'Post Announcement'}
+              </button>
+            </div>
+
+            {/* Existing announcements */}
+            {announcements.length === 0 && (
+              <p className="text-sm text-gray-400 text-center py-8">No announcements posted yet.</p>
+            )}
+            {announcements.map((a) => (
+              <div key={a.id} className="bg-white rounded-2xl p-4 shadow-sm flex items-start gap-3">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: '#f0f7ee' }}
+                >
+                  <Megaphone size={18} color={PRIMARY} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-gray-900">{a.title}</p>
+                  {a.body && <p className="text-sm text-gray-500 mt-0.5 leading-snug">{a.body}</p>}
+                  <p className="text-xs text-gray-400 mt-1">
+                    Posted {new Date(a.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+                    {' · '}
+                    <span className="text-amber-500 font-medium">
+                      Expires {new Date(a.expires_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </p>
+                </div>
+                <button
+                  onClick={() => deleteAnnouncement(a.id)}
+                  className="p-1.5 text-gray-300 hover:text-red-500 transition-colors flex-shrink-0"
+                  aria-label="Delete"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
         )}
 
         {activeTab === 'passes' && (

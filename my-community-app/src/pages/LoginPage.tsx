@@ -1,99 +1,47 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import { useNavigate } from 'react-router-dom'
+import levLogo from '@/assets/Stylized_Leaf_Logo_Design_Fotor-removebg-preview.png'
 
-const PRIMARY = '#243d20'
+const YELLOW = '#F5C200'
+const BG = 'radial-gradient(ellipse at 50% 30%, #2d6b27 0%, #182f15 100%)'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (authError) {
-      setError(authError.message)
-    } else {
-      navigate('/', { replace: true })
-    }
-  }
-
   return (
-    <div className="min-h-svh flex flex-col" style={{ backgroundColor: '#f0f0ec' }}>
-      <header className="px-6 pt-10 pb-8" style={{ backgroundColor: PRIMARY }}>
-        <h1 className="text-white text-2xl font-bold">LEV Portal</h1>
-        <p className="text-green-300 text-sm mt-1">Your community, connected.</p>
-      </header>
+    <div
+      className="min-h-svh flex flex-col items-center justify-between px-6 pt-20 pb-16"
+      style={{ background: BG }}
+    >
+      {/* Logo + name */}
+      <div className="flex flex-col items-center gap-4 flex-1 justify-center">
+        <img
+          src={levLogo}
+          alt="LEV"
+          className="h-32 w-auto sm:h-44"
+          style={{ filter: 'brightness(0) invert(1)' }}
+        />
+        <div className="text-center">
+          <h1 className="text-white text-3xl font-bold tracking-wide">LEV Portal</h1>
+          <p className="text-white/60 text-sm mt-1">Your community, connected.</p>
+        </div>
+      </div>
 
-      <main className="flex-1 flex items-start justify-center p-6 pt-10">
-        <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Email address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              placeholder="you@example.com"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-900 bg-white outline-none focus:ring-2 focus:border-transparent"
-              style={{ '--tw-ring-color': PRIMARY } as React.CSSProperties}
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-600">
-                Password
-              </label>
-              <Link
-                to="/forgot-password"
-                className="text-xs font-medium"
-                style={{ color: PRIMARY }}
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-900 bg-white outline-none focus:ring-2 focus:border-transparent"
-            />
-          </div>
-
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-lg text-white font-semibold text-sm transition-opacity disabled:opacity-60"
-            style={{ backgroundColor: PRIMARY }}
-          >
-            {loading ? 'Signing in…' : 'Sign In'}
-          </button>
-
-          <p className="text-center text-sm text-gray-500">
-            Don't have an account?{' '}
-            <Link to="/signup" className="font-semibold" style={{ color: PRIMARY }}>
-              Sign Up
-            </Link>
-          </p>
-
-
-        </form>
-      </main>
+      {/* Buttons */}
+      <div className="w-full max-w-sm space-y-3">
+        <button
+          onClick={() => navigate('/signin')}
+          className="w-full py-4 rounded-full font-bold text-base transition-opacity active:opacity-80"
+          style={{ backgroundColor: YELLOW, color: '#182f15' }}
+        >
+          Login
+        </button>
+        <button
+          onClick={() => navigate('/signup')}
+          className="w-full py-4 rounded-full font-semibold text-base text-white border border-white/30 bg-white/10 transition-opacity active:opacity-80"
+        >
+          Create Account
+        </button>
+      </div>
     </div>
   )
 }

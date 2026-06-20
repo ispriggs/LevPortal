@@ -53,7 +53,7 @@ function PostCard({
   const needsExpansion = post.content.length > 220 || post.content.split('\n').length > 4
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-400 overflow-hidden">
 
       {/* Card header — avatar, name, date */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
@@ -149,18 +149,18 @@ export default function NewsPage() {
       const nameMap = await fetchNameMap(uids)
 
       setPosts(postRows.map((p) => ({
-        id:        p.id,
-        author:    nameMap[p.author_id] ?? 'Unknown',
-        title:     p.title ?? '',
-        content:   p.content,
-        imageUrl:  p.image_url ?? undefined,
+        id: p.id,
+        author: nameMap[p.author_id] ?? 'Unknown',
+        title: p.title ?? '',
+        content: p.content,
+        imageUrl: p.image_url ?? undefined,
         createdAt: p.created_at,
-        comments:  comments
+        comments: comments
           .filter((c) => c.post_id === p.id)
           .map((c) => ({
-            id:        c.id,
-            author:    nameMap[c.author_id] ?? 'Unknown',
-            text:      c.text,
+            id: c.id,
+            author: nameMap[c.author_id] ?? 'Unknown',
+            text: c.text,
             createdAt: c.created_at,
           })),
       })))
@@ -176,8 +176,8 @@ export default function NewsPage() {
       .from('news_posts')
       .insert({
         author_id: authUser.id,
-        title:     data.title || null,
-        content:   data.content,
+        title: data.title || null,
+        content: data.content,
         image_url: data.imageUrl || null,
       })
       .select()
@@ -185,13 +185,13 @@ export default function NewsPage() {
 
     if (!row) return
     const newPost: NewsPost = {
-      id:        row.id,
-      author:    displayName,
-      title:     row.title ?? '',
-      content:   row.content,
-      imageUrl:  row.image_url ?? undefined,
+      id: row.id,
+      author: displayName,
+      title: row.title ?? '',
+      content: row.content,
+      imageUrl: row.image_url ?? undefined,
       createdAt: row.created_at,
-      comments:  [],
+      comments: [],
     }
     setPosts((prev) => [newPost, ...prev])
   }
@@ -208,9 +208,9 @@ export default function NewsPage() {
 
     if (!row) return
     const comment: NewsComment = {
-      id:        row.id,
-      author:    displayName,
-      text:      row.text,
+      id: row.id,
+      author: displayName,
+      text: row.text,
       createdAt: row.created_at,
     }
     setPosts((prev) =>
@@ -244,11 +244,11 @@ export default function NewsPage() {
       {/* Top bar */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
         <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Back">
-          <ArrowLeft size={22} color="#111" />
+          <ArrowLeft size={32} color="#111" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pt-1 pb-6">
 
         {/* Header */}
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Community Newsfeed</h1>

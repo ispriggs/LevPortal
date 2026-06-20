@@ -43,7 +43,7 @@ function ThreadView({
     <div className="fixed inset-0 z-30 bg-white flex flex-col safe-top">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-gray-100 bg-white flex-shrink-0">
-        <button onClick={onBack} className="p-1 -ml-1"><ArrowLeft size={22} color="#111" /></button>
+        <button onClick={onBack} className="p-1 -ml-1"><ArrowLeft size={32} color="#111" /></button>
         <div className="min-w-0">
           <p className="text-sm font-bold text-gray-900 truncate">{other}</p>
           <p className="text-xs text-gray-400 truncate">{thread.subject}</p>
@@ -110,9 +110,9 @@ function ThreadView({
 // ── Inbox list ─────────────────────────────────────────────────────────────
 
 export default function MessagesPage() {
-  const navigate     = useNavigate()
-  const user         = useAuthStore((s) => s.user)
-  const currentUser  = getDisplayName(user)
+  const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
+  const currentUser = getDisplayName(user)
   const { threads, reply, fetchThreads } = useMessagesStore()
 
   useEffect(() => { fetchThreads() }, [])

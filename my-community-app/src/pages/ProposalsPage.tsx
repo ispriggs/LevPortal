@@ -38,10 +38,10 @@ export type Proposal = {
 }
 
 const STATUS_CFG: Record<Proposal['status'], { label: string; bg: string; color: string }> = {
-  draft:    { label: 'Draft',          bg: '#f3f4f6', color: '#6b7280' },
-  pending:  { label: 'Pending Review', bg: '#fef3c7', color: '#92400e' },
-  approved: { label: 'Approved',       bg: '#d1fae5', color: '#065f46' },
-  rejected: { label: 'Rejected',       bg: '#fee2e2', color: '#991b1b' },
+  draft: { label: 'Draft', bg: '#f3f4f6', color: '#6b7280' },
+  pending: { label: 'Pending Review', bg: '#fef3c7', color: '#92400e' },
+  approved: { label: 'Approved', bg: '#d1fae5', color: '#065f46' },
+  rejected: { label: 'Rejected', bg: '#fee2e2', color: '#991b1b' },
 }
 
 async function fetchNameMap(uids: string[]): Promise<Record<string, string>> {
@@ -72,7 +72,18 @@ function ProposalCard({
   const [expanded, setExpanded] = useState(false)
   const isOwner = proposal.authorId === currentUserId
   const cfg = STATUS_CFG[proposal.status]
-  const needsExpansion = proposal.description.length > 220
+
+  const detailFields = [
+    { label: 'Supporters',           value: proposal.supporters },
+    { label: 'Problem & Solution',   value: proposal.problemSolution },
+    { label: 'Implementation Team',  value: proposal.implementationTeam },
+    { label: 'Implementation Plan',  value: proposal.implementationPlan },
+    { label: 'Timeline',             value: proposal.timeline },
+    { label: 'Long-term Management', value: proposal.longTermManagement },
+    { label: 'Costs',                value: proposal.costs },
+  ].filter(({ value }) => !!value)
+
+  const hasDetails = detailFields.length > 0 || proposal.description.length > 220
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
@@ -97,19 +108,32 @@ function ProposalCard({
         </span>
       </div>
 
-      {/* Category + title + body */}
+      {/* Category + title + description */}
       <div className="px-4 pb-3">
         <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 mb-2">
           {proposal.category}
         </span>
         <h2 className="text-base font-bold text-gray-900 leading-snug mb-1.5">{proposal.title}</h2>
-        <div className={`text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ${!expanded && needsExpansion ? 'line-clamp-4' : ''}`}>
+        <p className={`text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ${!expanded && proposal.description.length > 220 ? 'line-clamp-4' : ''}`}>
           {proposal.description}
-        </div>
-        {needsExpansion && (
+        </p>
+
+        {/* Expanded detail fields */}
+        {expanded && detailFields.length > 0 && (
+          <div className="mt-4 space-y-4 pt-4 border-t border-gray-100">
+            {detailFields.map(({ label, value }) => (
+              <div key={label}>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{label}</p>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {hasDetails && (
           <button
             onClick={() => setExpanded((x) => !x)}
-            className="flex items-center gap-0.5 mt-1.5 text-sm font-semibold"
+            className="flex items-center gap-0.5 mt-2 text-sm font-semibold"
             style={{ color: PRIMARY }}
           >
             {expanded
@@ -181,15 +205,15 @@ function ProposalCard({
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default function ProposalsPage() {
-  const navigate      = useNavigate()
-  const user          = useAuthStore((s) => s.user)
-  const displayName   = getDisplayName(user)
-  const userId        = user?.id ?? ''
+  const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
+  const displayName = getDisplayName(user)
+  const userId = user?.id ?? ''
 
-  const [proposals,        setProposals]        = useState<Proposal[]>([])
-  const [createOpen,       setCreateOpen]       = useState(false)
-  const [editingProposal,  setEditingProposal]  = useState<Proposal | null>(null)
-  const [commentProposal,  setCommentProposal]  = useState<Proposal | null>(null)
+  const [proposals, setProposals] = useState<Proposal[]>([])
+  const [createOpen, setCreateOpen] = useState(false)
+  const [editingProposal, setEditingProposal] = useState<Proposal | null>(null)
+  const [commentProposal, setCommentProposal] = useState<Proposal | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -208,36 +232,36 @@ export default function ProposalsPage() {
     const nameMap = await fetchNameMap(uids)
 
     setProposals(rows.map((r) => ({
-      id:                 r.id,
-      author:             nameMap[r.created_by] ?? 'Unknown',
-      authorId:           r.created_by,
-      category:           r.category,
-      title:              r.title,
-      description:        r.description,
-      supporters:         r.supporters ?? '',
-      problemSolution:    r.problem_solution ?? '',
+      id: r.id,
+      author: nameMap[r.created_by] ?? 'Unknown',
+      authorId: r.created_by,
+      category: r.category,
+      title: r.title,
+      description: r.description,
+      supporters: r.supporters ?? '',
+      problemSolution: r.problem_solution ?? '',
       implementationTeam: r.implementation_team ?? '',
       implementationPlan: r.implementation_plan ?? '',
-      timeline:           r.timeline ?? '',
+      timeline: r.timeline ?? '',
       longTermManagement: r.long_term_management ?? '',
-      costs:              r.costs ?? '',
-      photoUrl:           r.photo_url ?? undefined,
-      photoPath:          r.photo_path ?? undefined,
-      status:             r.status as Proposal['status'],
-      createdAt:          r.created_at,
-      comments:           comments
+      costs: r.costs ?? '',
+      photoUrl: r.photo_url ?? undefined,
+      photoPath: r.photo_path ?? undefined,
+      status: r.status as Proposal['status'],
+      createdAt: r.created_at,
+      comments: comments
         .filter((c) => c.proposal_id === r.id)
         .map((c) => ({
-          id:        c.id,
-          author:    nameMap[c.author_id] ?? 'Unknown',
-          text:      c.text,
+          id: c.id,
+          author: nameMap[c.author_id] ?? 'Unknown',
+          text: c.text,
           createdAt: c.created_at,
         })),
     })))
   }
 
   async function uploadPhoto(file: File, uid: string): Promise<{ url: string; path: string } | null> {
-    const ext  = file.name.split('.').pop() ?? 'jpg'
+    const ext = file.name.split('.').pop() ?? 'jpg'
     const path = `${uid}/${Date.now()}.${ext}`
     const { error } = await supabase.storage.from('proposal-images').upload(path, file)
     if (error) return null
@@ -249,7 +273,7 @@ export default function ProposalsPage() {
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) return
 
-    let photoUrl  = editingProposal?.photoUrl
+    let photoUrl = editingProposal?.photoUrl
     let photoPath = editingProposal?.photoPath
     if (data.photo) {
       const uploaded = await uploadPhoto(data.photo, authUser.id)
@@ -257,20 +281,20 @@ export default function ProposalsPage() {
     }
 
     const payload = {
-      category:             data.category,
-      title:                data.title,
-      description:          data.description,
-      supporters:           data.supporters || null,
-      problem_solution:     data.problemSolution || null,
-      implementation_team:  data.implementationTeam || null,
-      implementation_plan:  data.implementationPlan || null,
-      timeline:             data.timeline || null,
+      category: data.category,
+      title: data.title,
+      description: data.description,
+      supporters: data.supporters || null,
+      problem_solution: data.problemSolution || null,
+      implementation_team: data.implementationTeam || null,
+      implementation_plan: data.implementationPlan || null,
+      timeline: data.timeline || null,
       long_term_management: data.longTermManagement || null,
-      costs:                data.costs || null,
-      photo_url:            photoUrl ?? null,
-      photo_path:           photoPath ?? null,
+      costs: data.costs || null,
+      photo_url: photoUrl ?? null,
+      photo_path: photoPath ?? null,
       status,
-      updated_at:           new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }
 
     if (editingProposal) {
@@ -285,24 +309,24 @@ export default function ProposalsPage() {
         .single()
       if (!row) return
       const newP: Proposal = {
-        id:                 row.id,
-        author:             displayName,
-        authorId:           authUser.id,
-        category:           row.category,
-        title:              row.title,
-        description:        row.description,
-        supporters:         row.supporters ?? '',
-        problemSolution:    row.problem_solution ?? '',
+        id: row.id,
+        author: displayName,
+        authorId: authUser.id,
+        category: row.category,
+        title: row.title,
+        description: row.description,
+        supporters: row.supporters ?? '',
+        problemSolution: row.problem_solution ?? '',
         implementationTeam: row.implementation_team ?? '',
         implementationPlan: row.implementation_plan ?? '',
-        timeline:           row.timeline ?? '',
+        timeline: row.timeline ?? '',
         longTermManagement: row.long_term_management ?? '',
-        costs:              row.costs ?? '',
-        photoUrl:           row.photo_url ?? undefined,
-        photoPath:          row.photo_path ?? undefined,
+        costs: row.costs ?? '',
+        photoUrl: row.photo_url ?? undefined,
+        photoPath: row.photo_path ?? undefined,
         status,
-        createdAt:          row.created_at,
-        comments:           [],
+        createdAt: row.created_at,
+        comments: [],
       }
       setProposals((prev) => [newP, ...prev])
     }
@@ -357,19 +381,19 @@ export default function ProposalsPage() {
 
   const initialForEdit: Partial<ProposalFormData> | undefined = editingProposal
     ? {
-        category:           editingProposal.category,
-        title:              editingProposal.title,
-        description:        editingProposal.description,
-        supporters:         editingProposal.supporters,
-        problemSolution:    editingProposal.problemSolution,
-        implementationTeam: editingProposal.implementationTeam,
-        implementationPlan: editingProposal.implementationPlan,
-        timeline:           editingProposal.timeline,
-        longTermManagement: editingProposal.longTermManagement,
-        costs:              editingProposal.costs,
-        photo:              null,
-        existingPhotoUrl:   editingProposal.photoUrl,
-      }
+      category: editingProposal.category,
+      title: editingProposal.title,
+      description: editingProposal.description,
+      supporters: editingProposal.supporters,
+      problemSolution: editingProposal.problemSolution,
+      implementationTeam: editingProposal.implementationTeam,
+      implementationPlan: editingProposal.implementationPlan,
+      timeline: editingProposal.timeline,
+      longTermManagement: editingProposal.longTermManagement,
+      costs: editingProposal.costs,
+      photo: null,
+      existingPhotoUrl: editingProposal.photoUrl,
+    }
     : undefined
 
   return (
@@ -378,11 +402,11 @@ export default function ProposalsPage() {
       {/* Top bar */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
         <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Back">
-          <ArrowLeft size={22} color="#111" />
+          <ArrowLeft size={32} color="#111" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pt-1 pb-6">
 
         {/* Header */}
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Proposals</h1>

@@ -109,7 +109,7 @@ function TicketDetailView({
 
       {/* Header */}
       <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-gray-100 bg-white flex-shrink-0">
-        <button onClick={onBack} className="p-1 -ml-1"><ArrowLeft size={22} color="#111" /></button>
+        <button onClick={onBack} className="p-1 -ml-1"><ArrowLeft size={32} color="#111" /></button>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold text-gray-400">{ticket.ticketNumber}</p>
           <p className="text-sm font-bold text-gray-900 truncate">{ticket.subject}</p>
@@ -215,8 +215,7 @@ function TicketCard({ ticket, onClick }: { ticket: Ticket; onClick: () => void }
   const commentCount = ticket.history.filter((h) => h.type === 'comment').length
 
   return (
-    <button onClick={onClick} className="w-full bg-white rounded-2xl border border-gray-200 overflow-hidden flex text-left active:opacity-80">
-      <div className="w-1.5 flex-shrink-0" style={{ backgroundColor: cat.color }} />
+    <button onClick={onClick} className="w-full bg-white rounded-2xl border border-gray-400 overflow-hidden flex text-left active:opacity-80">
       <div className="flex-1 p-4 min-w-0">
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <div className="min-w-0 flex-1">
@@ -314,11 +313,11 @@ export default function NeighbourSupportPage() {
         {/* Top bar */}
         <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
           <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Back">
-            <ArrowLeft size={22} color="#111" />
+            <ArrowLeft size={32} color="#111" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
+        <div className="flex-1 overflow-y-auto px-4 pt-1 pb-6">
 
           {/* Header */}
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Neighbour Support</h1>

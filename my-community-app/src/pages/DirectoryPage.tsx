@@ -32,7 +32,7 @@ function ContactCard({ contact, onClick }: { contact: Contact; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-white rounded-xl border border-gray-200 p-3 space-y-2 active:bg-gray-50 transition-colors"
+      className="w-full text-left bg-white rounded-xl border border-gray-400 p-3 space-y-2 active:bg-gray-50 transition-colors"
     >
       <div className="flex items-center gap-2">
         <Avatar />
@@ -73,23 +73,23 @@ export default function DirectoryPage() {
 
       setServices(
         (svcRows ?? []).map((r) => ({
-          id:       r.id,
-          name:     r.name,
-          service:  r.service,
+          id: r.id,
+          name: r.name,
+          service: r.service,
           location: r.location,
-          phone:    r.phone,
-          email:    r.email ?? undefined,
+          phone: r.phone,
+          email: r.email ?? undefined,
           whatsapp: r.whatsapp ?? undefined,
         }))
       )
 
       setUsers(
         (profileRows ?? []).map((r) => ({
-          id:       r.id,
-          name:     r.full_name,
-          service:  r.lot ? `Lot ${r.lot}` : 'Resident',
+          id: r.id,
+          name: r.full_name,
+          service: r.lot ? `Lot ${r.lot}` : 'Resident',
           location: 'LEV',
-          phone:    r.phone ?? '—',
+          phone: r.phone ?? '—',
         }))
       )
     }
@@ -101,10 +101,10 @@ export default function DirectoryPage() {
     const { data: row } = await supabase
       .from('directory_services')
       .insert({
-        name:       data.name,
-        service:    data.service,
-        location:   data.location,
-        phone:      data.phone,
+        name: data.name,
+        service: data.service,
+        location: data.location,
+        phone: data.phone,
         created_by: user?.id ?? null,
       })
       .select()
@@ -112,12 +112,12 @@ export default function DirectoryPage() {
 
     if (row) {
       setServices((prev) => [...prev, {
-        id:       row.id,
-        name:     row.name,
-        service:  row.service,
+        id: row.id,
+        name: row.name,
+        service: row.service,
         location: row.location,
-        phone:    row.phone,
-        email:    row.email ?? undefined,
+        phone: row.phone,
+        email: row.email ?? undefined,
         whatsapp: row.whatsapp ?? undefined,
       }])
     }
@@ -139,11 +139,11 @@ export default function DirectoryPage() {
       {/* Top bar with back arrow */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
         <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Back">
-          <ArrowLeft size={22} color="#111" />
+          <ArrowLeft size={32} color="#111" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pt-1 pb-6">
 
         {/* Title */}
         <h1 className="text-2xl font-bold text-gray-900">Community Directory</h1>

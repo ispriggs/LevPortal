@@ -12,15 +12,15 @@ interface Props {
 }
 
 export default function ProfileSheet({ open, onClose, onLogout }: Props) {
-  const user     = useAuthStore((s) => s.user)
+  const user = useAuthStore((s) => s.user)
   const setSession = useAuthStore((s) => s.setSession)
-  const role     = getRole(user)
+  const role = getRole(user)
 
   const [fullName, setFullName] = useState('')
-  const [phone,    setPhone]    = useState('')
-  const [lot,      setLot]      = useState('')
-  const [saving,   setSaving]   = useState(false)
-  const [saved,    setSaved]    = useState(false)
+  const [phone, setPhone] = useState('')
+  const [lot, setLot] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     if (!open || !user) return
@@ -61,7 +61,7 @@ export default function ProfileSheet({ open, onClose, onLogout }: Props) {
     <>
       <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl overflow-y-auto" style={{ maxHeight: '70vh', minHeight: '40vh', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl overflow-y-auto" style={{ maxHeight: '85vh', minHeight: '40vh', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />

@@ -88,7 +88,7 @@ export default function CreateProposalSheet({ open, onClose, onSaveDraft, onSubm
     onClose()
   }
 
-  const canDraft  = !!form.title.trim()
+  const canDraft = !!form.title.trim()
   const canSubmit = !!form.title.trim() && !!form.description.trim()
 
   return (
@@ -99,8 +99,8 @@ export default function CreateProposalSheet({ open, onClose, onSaveDraft, onSubm
         onClick={onClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300"
-        style={{ maxHeight: '70vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300"
+        style={{ maxHeight: '85vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 flex-shrink-0">

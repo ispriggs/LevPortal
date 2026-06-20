@@ -60,7 +60,7 @@ function PollCard({
       : poll.description
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+    <div className="bg-white rounded-2xl border border-gray-400 p-4 space-y-3">
 
       {/* Title + badges */}
       <div className="flex items-start justify-between gap-2">
@@ -377,11 +377,11 @@ export default function VotingPage() {
       {/* Top bar */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
         <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Back">
-          <ArrowLeft size={22} color="#111" />
+          <ArrowLeft size={32} color="#111" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pt-1 pb-6">
 
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-1">
