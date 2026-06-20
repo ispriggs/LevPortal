@@ -46,7 +46,7 @@ export default function LoginPage() {
               required
               autoComplete="email"
               placeholder="you@example.com"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white outline-none focus:ring-2 focus:border-transparent"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-900 bg-white outline-none focus:ring-2 focus:border-transparent"
               style={{ '--tw-ring-color': PRIMARY } as React.CSSProperties}
             />
           </div>
@@ -71,7 +71,7 @@ export default function LoginPage() {
               required
               autoComplete="current-password"
               placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white outline-none focus:ring-2 focus:border-transparent"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-900 bg-white outline-none focus:ring-2 focus:border-transparent"
             />
           </div>
 
@@ -93,23 +93,7 @@ export default function LoginPage() {
             </Link>
           </p>
 
-          {/* DEV ONLY — remove when Supabase auth is wired up */}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => { mockLogin('Ian Spriggs', 'owner'); navigate('/', { replace: true }) }}
-              className="flex-1 py-2 rounded-lg text-xs text-gray-400 border border-dashed border-gray-300"
-            >
-              Skip as Owner
-            </button>
-            <button
-              type="button"
-              onClick={() => { mockLogin('Sam Renter', 'renter'); navigate('/', { replace: true }) }}
-              className="flex-1 py-2 rounded-lg text-xs text-gray-400 border border-dashed border-gray-300"
-            >
-              Skip as Renter
-            </button>
-          </div>
+
         </form>
       </main>
     </div>

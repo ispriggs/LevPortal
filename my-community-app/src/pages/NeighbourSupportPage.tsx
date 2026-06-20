@@ -154,11 +154,11 @@ function SubmitTicketSheet({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">Full Name *</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700" />
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1.5">Unit / Lot *</label>
-              <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="e.g. 7" className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700" />
+              <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="e.g. 7" className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700" />
             </div>
           </div>
 
@@ -190,13 +190,13 @@ function SubmitTicketSheet({
           {/* Subject */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Subject *</label>
-            <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Short summary of the issue" className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700" />
+            <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Short summary of the issue" className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700" />
           </div>
 
           {/* Description */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Description *</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the issue in detail…" rows={4} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700 resize-none" />
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the issue in detail…" rows={4} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none" />
           </div>
 
           {/* Priority */}
@@ -345,7 +345,7 @@ function TicketDetailView({
             onChange={(e) => setText(e.target.value)}
             placeholder="Add a comment or reply…"
             rows={1}
-            className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700 resize-none"
+            className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
             style={{ maxHeight: 96 }}
             onInput={(e) => {
               const el = e.currentTarget
@@ -527,7 +527,7 @@ export default function NeighbourSupportPage() {
               <input
                 type="text" value={search} onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search tickets…"
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-900 outline-none focus:border-green-700 bg-white"
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl text-base text-gray-900 outline-none focus:border-green-700 bg-white"
               />
             </div>
             <div className="flex gap-2">

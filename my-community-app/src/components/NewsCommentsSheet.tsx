@@ -110,7 +110,7 @@ export default function NewsCommentsSheet({
             onChange={(e) => setText(e.target.value)}
             placeholder="Write a comment…"
             rows={1}
-            className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700 resize-none"
+            className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
             style={{ maxHeight: '96px' }}
             onInput={(e) => {
               const el = e.currentTarget

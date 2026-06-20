@@ -267,7 +267,7 @@ export default function DocumentsPage() {
               placeholder="All Titles"
               value={titleFilter}
               onChange={(e) => setTitleFilter(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 outline-none focus:border-green-700"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-700 outline-none focus:border-green-700"
             />
           </div>
           <div>

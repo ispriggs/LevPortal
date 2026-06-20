@@ -296,7 +296,7 @@ function CreatePassView({
           <select
             value={type}
             onChange={(e) => setType(e.target.value as PassType)}
-            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 bg-white outline-none focus:border-green-700"
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 bg-white outline-none focus:border-green-700"
           >
             {PASS_TYPES.map((pt) => (
               <option key={pt.value} value={pt.value}>{pt.label}</option>
@@ -310,7 +310,7 @@ function CreatePassView({
           <select
             value={reason}
             onChange={(e) => setReason(e.target.value as PassReason)}
-            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 bg-white outline-none focus:border-green-700"
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 bg-white outline-none focus:border-green-700"
           >
             {PASS_REASONS.map((r) => (
               <option key={r} value={r}>{PASS_REASON_LABELS[r]}</option>
@@ -324,7 +324,7 @@ function CreatePassView({
           <input
             type="text" value={name} onChange={(e) => setName(e.target.value)}
             placeholder="Visitor's full name"
-            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700"
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700"
           />
         </div>
 
@@ -337,7 +337,7 @@ function CreatePassView({
           <input
             type="email" value={email} onChange={(e) => setEmail(e.target.value)}
             placeholder="visitor@email.com"
-            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700"
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700"
           />
         </div>
 
@@ -347,7 +347,7 @@ function CreatePassView({
           <input
             type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
             placeholder="+506 8888-0000"
-            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700"
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700"
           />
         </div>
 
@@ -357,7 +357,7 @@ function CreatePassView({
           <select
             value={lot}
             onChange={(e) => setLot(e.target.value)}
-            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 bg-white outline-none focus:border-green-700"
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 bg-white outline-none focus:border-green-700"
           >
             {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
               <option key={n} value={String(n)}>Lot {n}</option>
@@ -395,7 +395,7 @@ function CreatePassView({
           <input
             type="date" value={arrival} min={todayStr}
             onChange={(e) => { setArrival(e.target.value); if (!extended) setDeparture(e.target.value) }}
-            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700"
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700"
           />
         </div>
 
@@ -407,7 +407,7 @@ function CreatePassView({
               <input
                 type="date" value={departure} min={arrival}
                 onChange={(e) => setDeparture(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700"
+                className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700"
               />
             </div>
 

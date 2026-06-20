@@ -156,7 +156,7 @@ export default function DirectoryPage() {
           <select
             value={mode}
             onChange={(e) => { setMode(e.target.value as 'services' | 'users'); setActiveLetter(null) }}
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white outline-none"
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-base bg-white outline-none"
           >
             <option value="services">Services</option>
             <option value="users">Users</option>

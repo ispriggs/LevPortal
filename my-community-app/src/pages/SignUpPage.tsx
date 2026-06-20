@@ -30,7 +30,7 @@ function resizeImage(file: File, maxPx = 256): Promise<string> {
 }
 
 const inputCls =
-  'w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 bg-white outline-none focus:ring-2 focus:border-transparent'
+  'w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 bg-white outline-none focus:ring-2 focus:border-transparent'
 const labelCls =
   'block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5'
 

@@ -123,7 +123,7 @@ export default function UploadDocumentSheet({ open, onClose, onSave }: Props) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter document title"
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
+              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
             />
           </div>
 

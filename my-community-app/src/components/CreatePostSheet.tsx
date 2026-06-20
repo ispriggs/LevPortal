@@ -69,7 +69,7 @@ export default function CreatePostSheet({ open, onClose, onSave }: Props) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. LEV Talent Show"
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
+              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
             />
           </div>
 
@@ -80,7 +80,7 @@ export default function CreatePostSheet({ open, onClose, onSave }: Props) {
               onChange={(e) => setContent(e.target.value)}
               placeholder="What's happening in the community?"
               rows={6}
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700 resize-none"
+              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700 resize-none"
             />
             <p className="text-right text-xs text-gray-400 mt-1">{content.length} chars</p>
           </div>

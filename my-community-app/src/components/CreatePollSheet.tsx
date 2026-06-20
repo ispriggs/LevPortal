@@ -82,7 +82,7 @@ export default function CreatePollSheet({ open, onClose, onSave }: Props) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Low Ropes Course"
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
+              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
             />
           </div>
 
@@ -94,7 +94,7 @@ export default function CreatePollSheet({ open, onClose, onSave }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the proposal or question in detail…"
               rows={4}
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700 resize-none"
+              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700 resize-none"
             />
           </div>
 
@@ -169,7 +169,7 @@ export default function CreatePollSheet({ open, onClose, onSave }: Props) {
                     value={opt}
                     onChange={(e) => updateOption(i, e.target.value)}
                     placeholder={`Option ${i + 1}`}
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
                   />
                   {options.length > 2 && (
                     <button onClick={() => removeOption(i)} className="text-red-400 p-1">

@@ -107,7 +107,7 @@ function MessageSheet({
             value={text} onChange={(e) => setText(e.target.value)}
             placeholder="Write your message…"
             rows={5}
-            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700 resize-none"
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
           />
           <button onClick={handleSend} disabled={!text.trim()} className="w-full py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-40" style={{ backgroundColor: PRIMARY }}>
             <Send size={15} /> Send Message
@@ -150,7 +150,7 @@ function SignupDeclineSheet({
             value={reason} onChange={(e) => setReason(e.target.value)}
             placeholder="Enter reason for declining…"
             rows={4}
-            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm text-gray-900 outline-none focus:border-red-500 resize-none"
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-red-500 resize-none"
           />
           <button onClick={handleDecline} disabled={!reason.trim()} className="w-full py-3.5 rounded-xl text-white font-semibold text-sm disabled:opacity-40" style={{ backgroundColor: RED }}>
             Decline & Send Email
@@ -218,7 +218,7 @@ function ProposalStatusSheet({
             <input
               type="text" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}
               placeholder="Assigned to (e.g. Board Committee)"
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 outline-none focus:border-green-700"
+              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700"
             />
           )}
           <button onClick={handleUpdate} className="w-full py-3.5 rounded-xl text-white font-semibold text-sm" style={{ backgroundColor: PRIMARY }}>
@@ -568,7 +568,7 @@ function TicketManageView({
             value={note} onChange={(e) => setNote(e.target.value)}
             placeholder="Add a note or update to the ticket…"
             rows={2}
-            className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700 resize-none"
+            className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
           />
           <button onClick={handleSendNote} disabled={!note.trim()} className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 disabled:opacity-40" style={{ backgroundColor: PRIMARY }}>
             <Send size={15} color="white" />

@@ -130,7 +130,7 @@ export default function AddServiceSheet({ open, onClose, onSave }: Props) {
               value={form.name}
               onChange={(e) => set('name', e.target.value)}
               placeholder="e.g. Milton"
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 bg-white outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
+              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 bg-white outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
             />
           </div>
 
@@ -146,7 +146,7 @@ export default function AddServiceSheet({ open, onClose, onSave }: Props) {
               value={form.location}
               onChange={(e) => set('location', e.target.value)}
               placeholder="e.g. Atenas"
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 bg-white outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
+              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 bg-white outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
             />
           </div>
 
@@ -157,7 +157,7 @@ export default function AddServiceSheet({ open, onClose, onSave }: Props) {
               value={form.phone}
               onChange={(e) => set('phone', e.target.value)}
               placeholder="+506 0000 0000"
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-900 bg-white outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
+              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 bg-white outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700"
             />
           </div>
 

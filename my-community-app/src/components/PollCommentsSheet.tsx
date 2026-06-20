@@ -99,7 +99,7 @@ export default function PollCommentsSheet({ poll, onClose, onAddComment }: Props
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder={`Comment as ${displayName}…`}
-            className="flex-1 border border-gray-300 rounded-full px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-700"
+            className="flex-1 border border-gray-300 rounded-full px-4 py-2.5 text-base text-gray-900 outline-none focus:border-green-700"
           />
           <button
             onClick={handleSend}
