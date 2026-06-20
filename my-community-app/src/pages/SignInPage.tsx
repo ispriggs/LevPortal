@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import levLogo from '@/assets/Stylized_Leaf_Logo_Design_Fotor-removebg-preview.png'
@@ -28,7 +28,7 @@ export default function SignInPage() {
 
   return (
     <div
-      className="min-h-svh flex flex-col items-center justify-center px-5 py-12"
+      className="min-h-screen flex flex-col items-center justify-center px-5 py-12"
       style={{ background: BG }}
     >
       {/* Small logo + name */}
@@ -90,7 +90,7 @@ export default function SignInPage() {
           className="w-full py-4 rounded-xl font-bold text-base transition-opacity disabled:opacity-60"
           style={{ backgroundColor: YELLOW, color: '#182f15' }}
         >
-          {loading ? 'Signing in…' : 'Sign In'}
+          {loading ? 'Signing inâ€¦' : 'Sign In'}
         </button>
       </form>
 
@@ -100,7 +100,7 @@ export default function SignInPage() {
           onClick={() => navigate('/login')}
           className="text-white/50 text-sm hover:text-white/70 transition-colors"
         >
-          ← Back
+          â† Back
         </button>
         <Link
           to="/forgot-password"
@@ -112,3 +112,4 @@ export default function SignInPage() {
     </div>
   )
 }
+

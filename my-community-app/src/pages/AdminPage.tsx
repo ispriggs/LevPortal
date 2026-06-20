@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Check, X, Send, MessageSquare,
@@ -22,7 +22,7 @@ import type { ProposalComment } from '@/pages/ProposalsPage'
 const PRIMARY = '#243d20'
 const RED = '#c03828'
 
-// ── Types ────────────────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type DocStatus = 'pending' | 'approved' | 'declined'
 type SignupStatus = 'pending' | 'approved' | 'declined'
@@ -47,7 +47,7 @@ type AdminProposal = {
 
 
 
-// ── Helpers ───────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function fmt(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -83,7 +83,7 @@ function PriorityBadge({ priority }: { priority: TicketPriority }) {
   )
 }
 
-// ── Message Sheet ─────────────────────────────────────────────────────────
+// â”€â”€ Message Sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function MessageSheet({
   open, to, subject, onClose, onSend,
@@ -107,7 +107,7 @@ function MessageSheet({
           </div>
           <textarea
             value={text} onChange={(e) => setText(e.target.value)}
-            placeholder="Write your message…"
+            placeholder="Write your messageâ€¦"
             rows={5}
             className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
           />
@@ -120,7 +120,7 @@ function MessageSheet({
   )
 }
 
-// ── Signup Decline Sheet ──────────────────────────────────────────────────
+// â”€â”€ Signup Decline Sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SignupDeclineSheet({
   open, signup, onClose, onDecline,
@@ -150,7 +150,7 @@ function SignupDeclineSheet({
           </div>
           <textarea
             value={reason} onChange={(e) => setReason(e.target.value)}
-            placeholder="Enter reason for declining…"
+            placeholder="Enter reason for decliningâ€¦"
             rows={4}
             className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-red-500 resize-none"
           />
@@ -163,7 +163,7 @@ function SignupDeclineSheet({
   )
 }
 
-// ── Doc Preview Sheet ─────────────────────────────────────────────────────
+// â”€â”€ Doc Preview Sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function DocPreviewSheet({
   doc, onClose, onApprove, onDecline,
@@ -270,7 +270,7 @@ function DocPreviewSheet({
   )
 }
 
-// ── Tab sections ──────────────────────────────────────────────────────────
+// â”€â”€ Tab sections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function DocItem({ doc, onPreview }: { doc: PendingDoc; onPreview: () => void }) {
   return (
@@ -281,7 +281,7 @@ function DocItem({ doc, onPreview }: { doc: PendingDoc; onPreview: () => void })
       </div>
       <div className="text-xs text-gray-500 space-y-0.5">
         <p>Uploaded by <span className="font-medium text-gray-700">{doc.uploadedBy}</span></p>
-        <p>Folder: {doc.folder} · {doc.access === 'owners_only' ? 'Owners only' : 'All residents'}</p>
+        <p>Folder: {doc.folder} Â· {doc.access === 'owners_only' ? 'Owners only' : 'All residents'}</p>
         <p>{fmt(doc.uploadedAt)}</p>
       </div>
       <button
@@ -308,8 +308,8 @@ function SignupItem({ s, onApprove, onDecline }: { s: PendingSignup; onApprove: 
       </div>
       <div className="text-xs text-gray-500">
         <span className="capitalize font-medium text-gray-700">{s.role}</span>
-        {s.lot && ` · Lot ${s.lot}`}
-        {' · Applied '}{fmt(s.submittedAt)}
+        {s.lot && ` Â· Lot ${s.lot}`}
+        {' Â· Applied '}{fmt(s.submittedAt)}
       </div>
       {s.status === 'pending' && (
         <div className="flex gap-2 pt-1">
@@ -341,7 +341,7 @@ function ProposalItem({
           <StatusBadge status={p.status} />
         </div>
         <p className="text-xs text-gray-500 mb-3">
-          {p.submittedBy} · {fmt(p.submittedAt)}
+          {p.submittedBy} Â· {fmt(p.submittedAt)}
           {commentCount > 0 && <span className="ml-2">{commentCount} comment{commentCount !== 1 ? 's' : ''}</span>}
         </p>
         <button onClick={onManage} className="w-full py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2" style={{ backgroundColor: PRIMARY }}>
@@ -361,7 +361,7 @@ function AdminTicketCard({ ticket, onManage }: { ticket: Ticket; onManage: () =>
       <div className="flex-1 p-4 min-w-0">
         <div className="flex items-start justify-between gap-2 mb-1">
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-bold text-gray-400">{ticket.ticketNumber} · <span style={{ color: cat.color }}>{cat.label}</span></p>
+            <p className="text-[11px] font-bold text-gray-400">{ticket.ticketNumber} Â· <span style={{ color: cat.color }}>{cat.label}</span></p>
             <p className="text-sm font-bold text-gray-900 mt-0.5 leading-snug">{ticket.subject}</p>
           </div>
           <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -370,7 +370,7 @@ function AdminTicketCard({ ticket, onManage }: { ticket: Ticket; onManage: () =>
           </div>
         </div>
         <p className="text-xs text-gray-500 mb-3">
-          {ticket.submittedBy} · Unit {ticket.unit} · {fmt(ticket.createdAt)}
+          {ticket.submittedBy} Â· Unit {ticket.unit} Â· {fmt(ticket.createdAt)}
           {commentCount > 0 && <span className="ml-2">{commentCount} comment{commentCount !== 1 ? 's' : ''}</span>}
         </p>
         <button onClick={onManage} className="w-full py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2" style={{ backgroundColor: PRIMARY }}>
@@ -426,7 +426,7 @@ function TicketManageView({
           <StatusBadge status={live.status} />
         </div>
         <p className="text-sm text-gray-700 leading-relaxed">{live.description}</p>
-        <p className="text-xs text-gray-400">{live.submittedBy} · Unit {live.unit} · {fmt(live.createdAt)}</p>
+        <p className="text-xs text-gray-400">{live.submittedBy} Â· Unit {live.unit} Â· {fmt(live.createdAt)}</p>
       </div>
 
       {/* History */}
@@ -440,7 +440,7 @@ function TicketManageView({
               <div key={entry.id} className="flex items-center gap-3 py-1">
                 <div className="flex-1 border-t border-dashed border-gray-200" />
                 <p className="text-[11px] text-gray-400 text-center flex-shrink-0 whitespace-nowrap">
-                  → <strong className="text-gray-600">{STATUS_CONFIG[entry.toStatus!].label}</strong> · {fmt(entry.createdAt)}
+                  â†’ <strong className="text-gray-600">{STATUS_CONFIG[entry.toStatus!].label}</strong> Â· {fmt(entry.createdAt)}
                 </p>
                 <div className="flex-1 border-t border-dashed border-gray-200" />
               </div>
@@ -458,7 +458,7 @@ function TicketManageView({
                   {entry.text}
                 </div>
                 <p className={`text-[10px] text-gray-400 mt-1 ${isAdmin ? 'ml-1' : 'text-right mr-1'}`}>
-                  {entry.actor} · {fmt(entry.createdAt)}
+                  {entry.actor} Â· {fmt(entry.createdAt)}
                 </p>
               </div>
             </div>
@@ -480,7 +480,7 @@ function TicketManageView({
         <div className="flex gap-2 items-end">
           <textarea
             value={note} onChange={(e) => setNote(e.target.value)}
-            placeholder="Add a note or update to the ticket…"
+            placeholder="Add a note or update to the ticketâ€¦"
             rows={2}
             className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
           />
@@ -493,7 +493,7 @@ function TicketManageView({
   )
 }
 
-// ── Proposal Manage View ──────────────────────────────────────────────────
+// â”€â”€ Proposal Manage View â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ProposalManageView({
   proposal, allProposals, adminName, onBack, onApprove, onReject, onMessage, onAddComment,
@@ -535,7 +535,7 @@ function ProposalManageView({
       <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0 space-y-2">
         <div className="flex items-center justify-between">
           <StatusBadge status={live.status} />
-          <p className="text-xs text-gray-400">By {live.submittedBy} · {fmt(live.submittedAt)}</p>
+          <p className="text-xs text-gray-400">By {live.submittedBy} Â· {fmt(live.submittedAt)}</p>
         </div>
         {live.status === 'pending' && (
           <div className="flex gap-2">
@@ -603,7 +603,7 @@ function ProposalManageView({
                     {c.text}
                   </div>
                   <p className={`text-[10px] text-gray-400 mt-1 ${isAdminComment ? 'ml-1' : 'text-right mr-1'}`}>
-                    {c.author} · {fmt(c.createdAt)}
+                    {c.author} Â· {fmt(c.createdAt)}
                   </p>
                 </div>
               </div>
@@ -618,7 +618,7 @@ function ProposalManageView({
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Add a note on this proposal…"
+            placeholder="Add a note on this proposalâ€¦"
             rows={2}
             className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
           />
@@ -637,7 +637,7 @@ function ProposalManageView({
   )
 }
 
-// ── Pass Decline Sheet ────────────────────────────────────────────────────────
+// â”€â”€ Pass Decline Sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function PassDeclineSheet({
   open, pass, onClose, onDecline,
@@ -662,7 +662,7 @@ function PassDeclineSheet({
           {pass && (
             <div className="p-3 bg-gray-50 rounded-xl text-sm">
               <p className="font-semibold text-gray-900">{pass.visitorName}</p>
-              <p className="text-gray-500">Requested by {pass.createdBy} · Lot {pass.visitingLot}</p>
+              <p className="text-gray-500">Requested by {pass.createdBy} Â· Lot {pass.visitingLot}</p>
             </div>
           )}
           <div className="flex items-start gap-2 p-3 bg-red-50 rounded-xl">
@@ -671,7 +671,7 @@ function PassDeclineSheet({
           </div>
           <textarea
             value={reason} onChange={(e) => setReason(e.target.value)}
-            placeholder="Enter reason for declining…"
+            placeholder="Enter reason for decliningâ€¦"
             rows={4}
             className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-red-500 resize-none"
           />
@@ -684,7 +684,7 @@ function PassDeclineSheet({
   )
 }
 
-// ── Extended Pass Card ────────────────────────────────────────────────────────
+// â”€â”€ Extended Pass Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ExtendedPassCard({
   pass, onApprove, onDecline,
@@ -715,7 +715,7 @@ function ExtendedPassCard({
           </span>
         </div>
         <p className="text-xs text-gray-500">
-          {fmt(pass.arrivalDate)} – {fmt(pass.departureDate)} · {pass.phone}
+          {fmt(pass.arrivalDate)} â€“ {fmt(pass.departureDate)} Â· {pass.phone}
         </p>
         <p className="text-xs text-gray-500">
           Requested by <span className="font-medium text-gray-700">{pass.createdBy}</span>
@@ -738,7 +738,7 @@ function ExtendedPassCard({
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────
+// â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type Tab = 'docs' | 'signups' | 'proposals' | 'tickets' | 'passes' | 'announcements'
 
@@ -754,7 +754,7 @@ export default function AdminPage() {
   async function handleDeclinePass(passId: string, reason: string) {
     const pass = allPasses.find((p) => p.id === passId)
     await storeDeclinePass(passId)
-    if (pass) setMsgSheet({ to: pass.createdBy, subject: `Re: Extended Pass Declined — ${pass.visitorName} · ${reason}` })
+    if (pass) setMsgSheet({ to: pass.createdBy, subject: `Re: Extended Pass Declined â€” ${pass.visitorName} Â· ${reason}` })
   }
 
   useEffect(() => {
@@ -905,7 +905,7 @@ export default function AdminPage() {
   const [previewDoc, setPreviewDoc] = useState<PendingDoc | null>(null)
   const [declinePassTarget, setDeclinePassTarget] = useState<GatePass | null>(null)
 
-  // ── Doc actions
+  // â”€â”€ Doc actions
   async function approveDoc(id: string) {
     await supabase.from('documents').update({ status: 'approved' }).eq('id', id)
     setDocs((p) => p.filter((d) => d.id !== id))
@@ -917,10 +917,10 @@ export default function AdminPage() {
       doc.filePath ? supabase.storage.from('documents').remove([doc.filePath]) : Promise.resolve(),
     ])
     setDocs((p) => p.filter((d) => d.id !== id))
-    setMsgSheet({ to: doc.uploadedBy, subject: `Re: Document declined — ${doc.title}` })
+    setMsgSheet({ to: doc.uploadedBy, subject: `Re: Document declined â€” ${doc.title}` })
   }
 
-  // ── Signup actions
+  // â”€â”€ Signup actions
   function approveSignup(id: string) {
     setSignups((p) => p.map((s) => s.id !== id ? s : { ...s, status: 'approved' }))
   }
@@ -931,7 +931,7 @@ export default function AdminPage() {
     alert(`Email sent to ${s.email}:\n\n"${reason}"`)
   }
 
-  // ── Proposal actions
+  // â”€â”€ Proposal actions
   async function approveProposal(id: string) {
     await supabase.from('proposals').update({ status: 'approved' }).eq('id', id)
     setProposals((prev) => prev.filter((x) => x.id !== id))
@@ -940,7 +940,7 @@ export default function AdminPage() {
     const p = proposals.find((x) => x.id === id)!
     await supabase.from('proposals').update({ status: 'rejected' }).eq('id', id)
     setProposals((prev) => prev.filter((x) => x.id !== id))
-    setMsgSheet({ to: p.submittedBy, subject: `Re: Proposal not approved — ${p.title}` })
+    setMsgSheet({ to: p.submittedBy, subject: `Re: Proposal not approved â€” ${p.title}` })
   }
   async function addProposalComment(proposalId: string, text: string) {
     if (!user?.id) return
@@ -954,7 +954,7 @@ export default function AdminPage() {
     setProposals((prev) => prev.map((p) => p.id !== proposalId ? p : { ...p, comments: [...p.comments, comment] }))
   }
 
-  // ── Send in-app message
+  // â”€â”€ Send in-app message
   function handleSendMessage(text: string) {
     if (!msgSheet) return
     startThread(msgSheet.subject, msgSheet.to, adminName, text)
@@ -976,7 +976,7 @@ export default function AdminPage() {
   ]
 
   return (
-    <div className="min-h-svh flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
 
       {/* Top bar */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
@@ -1105,7 +1105,7 @@ export default function AdminPage() {
                 style={{ backgroundColor: PRIMARY }}
               >
                 <Megaphone size={15} />
-                {annPosting ? 'Posting…' : 'Post Announcement'}
+                {annPosting ? 'Postingâ€¦' : 'Post Announcement'}
               </button>
             </div>
 
@@ -1126,7 +1126,7 @@ export default function AdminPage() {
                   {a.body && <p className="text-sm text-gray-500 mt-0.5 leading-snug">{a.body}</p>}
                   <p className="text-xs text-gray-400 mt-1">
                     Posted {new Date(a.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
-                    {' · '}
+                    {' Â· '}
                     <span className="text-amber-500 font-medium">
                       Expires {new Date(a.expires_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
@@ -1186,7 +1186,7 @@ export default function AdminPage() {
           onBack={() => setManagingTicket(null)}
           onMessage={() => {
             const t = allTickets.find((x) => x.id === managingTicket.id) ?? managingTicket
-            setMsgSheet({ to: t.submittedBy, subject: `Re: Ticket ${t.ticketNumber} — ${t.subject}` })
+            setMsgSheet({ to: t.submittedBy, subject: `Re: Ticket ${t.ticketNumber} â€” ${t.subject}` })
           }}
           onStatusChange={(id, status) => storeUpdateStatus(id, status, adminName)}
           onAddNote={(id, text) => storeAddComment(id, adminName, text, true)}
@@ -1222,3 +1222,4 @@ export default function AdminPage() {
     </div>
   )
 }
+

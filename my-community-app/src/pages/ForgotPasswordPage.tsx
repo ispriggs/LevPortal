@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, Mail } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -33,11 +33,11 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  /* ── Success state ── */
+  /* â”€â”€ Success state â”€â”€ */
   if (sent) {
     return (
       <div
-        className="min-h-svh flex flex-col items-center justify-center px-6 text-center safe-top safe-bottom"
+        className="min-h-screen flex flex-col items-center justify-center px-6 text-center safe-top safe-bottom"
         style={{ backgroundColor: PAGE_BG }}
       >
         <div
@@ -62,9 +62,9 @@ export default function ForgotPasswordPage() {
     )
   }
 
-  /* ── Request form ── */
+  /* â”€â”€ Request form â”€â”€ */
   return (
-    <div className="min-h-svh flex flex-col" style={{ backgroundColor: PAGE_BG }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: PAGE_BG }}>
 
       <header className="safe-top px-4 pt-4 pb-6" style={{ backgroundColor: PRIMARY }}>
         <button
@@ -108,7 +108,7 @@ export default function ForgotPasswordPage() {
             className="w-full py-3.5 rounded-xl text-white font-bold text-sm transition-opacity disabled:opacity-60"
             style={{ backgroundColor: PRIMARY }}
           >
-            {loading ? 'Sending…' : 'Send Reset Link'}
+            {loading ? 'Sendingâ€¦' : 'Send Reset Link'}
           </button>
 
         </form>
@@ -116,3 +116,4 @@ export default function ForgotPasswordPage() {
     </div>
   )
 }
+

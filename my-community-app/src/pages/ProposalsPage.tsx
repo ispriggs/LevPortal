@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus, MessageCircle, ChevronDown, ChevronUp, Clock, XCircle, FileEdit, CheckCircle, ClipboardList } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
@@ -54,7 +54,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
-// ── Proposal card ──────────────────────────────────────────────────────────
+// â”€â”€ Proposal card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ProposalCard({
   proposal,
@@ -202,7 +202,7 @@ function ProposalCard({
   )
 }
 
-// ── Page ───────────────────────────────────────────────────────────────────
+// â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function ProposalsPage() {
   const navigate = useNavigate()
@@ -397,7 +397,7 @@ export default function ProposalsPage() {
     : undefined
 
   return (
-    <div className="min-h-svh flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
 
       {/* Top bar */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
@@ -464,3 +464,4 @@ export default function ProposalsPage() {
     </div>
   )
 }
+

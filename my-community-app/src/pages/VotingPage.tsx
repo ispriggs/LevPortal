@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, User, Calendar, MessageCircle, Plus, Check, BarChart2 } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
@@ -35,7 +35,7 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-// ── Poll card ──────────────────────────────────────────────────────────────
+// â”€â”€ Poll card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function PollCard({
   poll,
@@ -56,7 +56,7 @@ function PollCard({
 
   const descTrimmed =
     poll.description.length > MAX_DESC && !expanded
-      ? poll.description.slice(0, MAX_DESC) + '…'
+      ? poll.description.slice(0, MAX_DESC) + 'â€¦'
       : poll.description
 
   return (
@@ -185,7 +185,7 @@ function PollCard({
         )}
         {hasVoted && (
           <p className="text-xs text-center mt-2" style={{ color: PRIMARY }}>
-            ✓ You voted on this poll
+            âœ“ You voted on this poll
           </p>
         )}
       </div>
@@ -202,7 +202,7 @@ function PollCard({
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────
+// â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function VotingPage() {
   const navigate = useNavigate()
@@ -372,7 +372,7 @@ export default function VotingPage() {
   }
 
   return (
-    <div className="min-h-svh flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
 
       {/* Top bar */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
@@ -432,3 +432,4 @@ export default function VotingPage() {
     </div>
   )
 }
+

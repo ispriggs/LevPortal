@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Send, MessageSquare, ChevronRight } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
@@ -16,7 +16,7 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-// ── Thread view (full-screen overlay) ────────────────────────────────────
+// â”€â”€ Thread view (full-screen overlay) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ThreadView({
   thread,
@@ -84,7 +84,7 @@ function ThreadView({
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Reply…"
+          placeholder="Replyâ€¦"
           rows={1}
           className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
           style={{ maxHeight: 96 }}
@@ -107,7 +107,7 @@ function ThreadView({
   )
 }
 
-// ── Inbox list ─────────────────────────────────────────────────────────────
+// â”€â”€ Inbox list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function MessagesPage() {
   const navigate = useNavigate()
@@ -144,7 +144,7 @@ export default function MessagesPage() {
         />
       )}
 
-      <div className="min-h-svh flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-gray-50">
         {/* Top bar */}
         <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
           <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Back">
@@ -206,3 +206,4 @@ export default function MessagesPage() {
     </>
   )
 }
+

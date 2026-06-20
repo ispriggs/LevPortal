@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+﻿import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Phone, Plus } from 'lucide-react'
 import DirectoryBottomSheet from '@/components/DirectoryBottomSheet'
@@ -89,7 +89,7 @@ export default function DirectoryPage() {
           name: r.full_name,
           service: r.lot ? `Lot ${r.lot}` : 'Resident',
           location: 'LEV',
-          phone: r.phone ?? '—',
+          phone: r.phone ?? 'â€”',
         }))
       )
     }
@@ -134,7 +134,7 @@ export default function DirectoryPage() {
   }, [activeLetter, mode, sourceList])
 
   return (
-    <div className="min-h-svh flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
 
       {/* Top bar with back arrow */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
@@ -148,7 +148,7 @@ export default function DirectoryPage() {
         {/* Title */}
         <h1 className="text-2xl font-bold text-gray-900">Community Directory</h1>
         <p className="text-sm text-gray-500 mt-1 mb-4">
-          Filter by service or user first. Then tap a letter (A–Z) to filter by name/service.
+          Filter by service or user first. Then tap a letter (Aâ€“Z) to filter by name/service.
         </p>
 
         {/* Service filter + Add button */}
@@ -171,7 +171,7 @@ export default function DirectoryPage() {
           </button>
         </div>
 
-        {/* A–Z alphabet bar */}
+        {/* Aâ€“Z alphabet bar */}
         <div className="flex overflow-x-auto scrollbar-none gap-0.5 mb-4 -mx-4 px-4">
           {ALPHABET.map((letter) => (
             <button
@@ -240,3 +240,4 @@ export default function DirectoryPage() {
     </div>
   )
 }
+

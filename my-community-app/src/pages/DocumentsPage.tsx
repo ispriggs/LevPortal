@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Upload, User, Eye, Calendar, Trash2, FileText, CheckCircle } from 'lucide-react'
 import { useAuthStore, getDisplayName, getRole } from '@/store/authStore'
@@ -37,7 +37,7 @@ function formatDateTime(iso: string) {
   })
 }
 
-// ── Document card ─────────────────────────────────────────────────────────
+// â”€â”€ Document card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function DocCard({
   doc,
@@ -88,7 +88,7 @@ function DocCard({
         View Document
       </button>
 
-      {/* Delete — uploader or owner */}
+      {/* Delete â€” uploader or owner */}
       {canDelete && (
         <button
           onClick={() => onDelete(doc.id)}
@@ -102,7 +102,7 @@ function DocCard({
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────
+// â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function DocumentsPage() {
   const navigate = useNavigate()
@@ -215,7 +215,7 @@ export default function DocumentsPage() {
   const availableFolders = FOLDERS.filter((f) => docs.some((d) => d.folder === f))
 
   return (
-    <div className="min-h-svh flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
 
       {/* Top bar */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
@@ -246,7 +246,7 @@ export default function DocumentsPage() {
         {uploadedPending && (
           <div className="flex items-center gap-2.5 px-4 py-3 mb-4 rounded-xl bg-green-50 border border-green-200">
             <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
-            <p className="text-sm text-green-700 font-medium">Document submitted — it will appear here once approved by an admin.</p>
+            <p className="text-sm text-green-700 font-medium">Document submitted â€” it will appear here once approved by an admin.</p>
           </div>
         )}
 
@@ -306,3 +306,4 @@ export default function DocumentsPage() {
     </div>
   )
 }
+

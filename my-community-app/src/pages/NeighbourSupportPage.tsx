@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Plus, Search, ChevronRight, Send, Flag,
@@ -23,7 +23,7 @@ export const STATUS_CONFIG: Record<TicketStatus, {
   closed: { label: 'Closed', color: '#6b7280', bg: '#f3f4f6', icon: XCircle },
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -54,7 +54,7 @@ function Toast({ msg, visible }: { msg: string; visible: boolean }) {
   )
 }
 
-// ── Shared badge components ───────────────────────────────────────────────
+// â”€â”€ Shared badge components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CategoryBadge({ category }: { category: TicketCategory }) {
   const cfg = CATEGORY_CONFIG[category]
@@ -84,9 +84,9 @@ function StatusBadge({ status }: { status: TicketStatus }) {
   )
 }
 
-// ── Submit Ticket Sheet ───────────────────────────────────────────────────
+// â”€â”€ Submit Ticket Sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ── Ticket Detail View (full-screen overlay) ──────────────────────────────
+// â”€â”€ Ticket Detail View (full-screen overlay) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function TicketDetailView({
   ticket, currentUser, onBack, onComment,
@@ -125,7 +125,7 @@ function TicketDetailView({
         </div>
         <p className="text-sm text-gray-700 leading-relaxed">{ticket.description}</p>
         <p className="text-xs text-gray-400">
-          {ticket.submittedBy} · Unit {ticket.unit} · {fmtDate(ticket.createdAt)}
+          {ticket.submittedBy} Â· Unit {ticket.unit} Â· {fmtDate(ticket.createdAt)}
         </p>
       </div>
 
@@ -143,7 +143,7 @@ function TicketDetailView({
               <div key={entry.id} className="flex items-center gap-3 py-1">
                 <div className="flex-1 border-t border-dashed border-gray-200" />
                 <p className="text-[11px] text-gray-400 text-center flex-shrink-0 whitespace-nowrap">
-                  Status → <strong className="text-gray-600">{toLabel}</strong> · {fmtDateTime(entry.createdAt)}
+                  Status â†’ <strong className="text-gray-600">{toLabel}</strong> Â· {fmtDateTime(entry.createdAt)}
                 </p>
                 <div className="flex-1 border-t border-dashed border-gray-200" />
               </div>
@@ -179,7 +179,7 @@ function TicketDetailView({
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Add a comment or reply…"
+            placeholder="Add a comment or replyâ€¦"
             rows={1}
             className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
             style={{ maxHeight: 96 }}
@@ -208,7 +208,7 @@ function TicketDetailView({
   )
 }
 
-// ── Ticket Card ───────────────────────────────────────────────────────────
+// â”€â”€ Ticket Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function TicketCard({ ticket, onClick }: { ticket: Ticket; onClick: () => void }) {
   const commentCount = ticket.history.filter((h) => h.type === 'comment').length
@@ -229,7 +229,7 @@ function TicketCard({ ticket, onClick }: { ticket: Ticket; onClick: () => void }
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap gap-1.5 items-center">
             <CategoryBadge category={ticket.category} />
-            <span className="text-[11px] text-gray-400">Unit {ticket.unit} · {fmtDate(ticket.createdAt)}</span>
+            <span className="text-[11px] text-gray-400">Unit {ticket.unit} Â· {fmtDate(ticket.createdAt)}</span>
           </div>
           {commentCount > 0 && (
             <span className="text-[11px] text-gray-400 flex-shrink-0">{commentCount} comment{commentCount !== 1 ? 's' : ''}</span>
@@ -243,7 +243,7 @@ function TicketCard({ ticket, onClick }: { ticket: Ticket; onClick: () => void }
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────
+// â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const STATUSES = ['open', 'in_progress', 'resolved', 'closed'] as const
 
@@ -307,7 +307,7 @@ export default function NeighbourSupportPage() {
         />
       )}
 
-      <div className="min-h-svh flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-gray-50">
 
         {/* Top bar */}
         <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
@@ -359,7 +359,7 @@ export default function NeighbourSupportPage() {
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search tickets…"
+                placeholder="Search ticketsâ€¦"
                 className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl text-base text-gray-900 outline-none focus:border-green-700 bg-white"
               />
             </div>
@@ -423,3 +423,4 @@ export default function NeighbourSupportPage() {
     </>
   )
 }
+

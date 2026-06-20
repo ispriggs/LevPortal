@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus, Share2, ChevronRight, Copy, X, Camera } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
@@ -16,7 +16,7 @@ const PASS_TYPES: { value: PassType; label: string }[] = [
   { value: 'other', label: 'Other' },
 ]
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function fmtDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -40,7 +40,7 @@ function passStatus(pass: GatePass): PassDisplayStatus {
 }
 
 function buildShareUrl(pass: GatePass): string {
-  // Only include fields PassSharePage actually uses — exclude id, email, idPhotoUrl
+  // Only include fields PassSharePage actually uses â€” exclude id, email, idPhotoUrl
   const payload = {
     passCode: pass.passCode,
     type: pass.type,
@@ -61,21 +61,21 @@ function buildShareUrl(pass: GatePass): string {
 function shareWhatsApp(pass: GatePass) {
   const url = buildShareUrl(pass)
   const valid = pass.extended
-    ? `${fmtDate(pass.arrivalDate)} – ${fmtDate(pass.departureDate)}`
+    ? `${fmtDate(pass.arrivalDate)} â€“ ${fmtDate(pass.departureDate)}`
     : fmtDate(pass.arrivalDate)
   const text =
-    `Welcome to LEV! 🌿\n\n` +
+    `Welcome to LEV! ðŸŒ¿\n\n` +
     `Here is your gate pass for Pura Maracay:\n\n` +
-    `👤 ${pass.visitorName}\n` +
-    `📅 ${valid}\n` +
-    `🏠 Lot ${pass.visitingLot}\n\n` +
+    `ðŸ‘¤ ${pass.visitorName}\n` +
+    `ðŸ“… ${valid}\n` +
+    `ðŸ  Lot ${pass.visitingLot}\n\n` +
     `Tap the link below to open your pass at the gate:\n${url}`
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
 }
 
 
 
-// ── Pass card ──────────────────────────────────────────────────────────────────
+// â”€â”€ Pass card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
   const cfg = PASS_TYPE_CONFIG[pass.type]
@@ -121,12 +121,12 @@ function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
         </div>
         <p className="text-xs text-gray-500 mb-3">
           {pass.extended
-            ? `${fmtDate(pass.arrivalDate)} – ${fmtDate(pass.departureDate)}`
+            ? `${fmtDate(pass.arrivalDate)} â€“ ${fmtDate(pass.departureDate)}`
             : fmtDate(pass.arrivalDate)}
         </p>
         {isPending && (
           <p className="text-xs font-medium text-amber-600 mb-3">
-            Pending approval · visitor can use gate for {hoursLeft}h · auto-expires if not approved.
+            Pending approval Â· visitor can use gate for {hoursLeft}h Â· auto-expires if not approved.
           </p>
         )}
         <div className="flex gap-2">
@@ -152,7 +152,7 @@ function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
   )
 }
 
-// ── Pass detail view ───────────────────────────────────────────────────────────
+// â”€â”€ Pass detail view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function PassDetailView({ pass, onClose }: { pass: GatePass; onClose: () => void }) {
   const cfg = PASS_TYPE_CONFIG[pass.type]
@@ -180,7 +180,7 @@ function PassDetailView({ pass, onClose }: { pass: GatePass; onClose: () => void
         {/* Styled pass card */}
         <div className="rounded-2xl overflow-hidden border border-gray-400 shadow-sm">
           <div className="px-5 py-4 text-white" style={{ backgroundColor: PRIMARY }}>
-            <p className="text-[10px] font-bold tracking-widest opacity-60">PURA MARACAY · ECOVILLA</p>
+            <p className="text-[10px] font-bold tracking-widest opacity-60">PURA MARACAY Â· ECOVILLA</p>
             <p className="text-xl font-black mt-0.5 tracking-wide">GATE PASS</p>
           </div>
           <div className="p-5 space-y-3">
@@ -206,7 +206,7 @@ function PassDetailView({ pass, onClose }: { pass: GatePass; onClose: () => void
                 <p className="text-[10px] uppercase tracking-wider text-gray-400">Valid</p>
                 <p className="text-xs font-semibold text-gray-800">
                   {pass.extended
-                    ? `${fmtDate(pass.arrivalDate)} – ${fmtDate(pass.departureDate)}`
+                    ? `${fmtDate(pass.arrivalDate)} â€“ ${fmtDate(pass.departureDate)}`
                     : fmtDate(pass.arrivalDate)}
                 </p>
               </div>
@@ -257,7 +257,7 @@ function PassDetailView({ pass, onClose }: { pass: GatePass; onClose: () => void
   )
 }
 
-// ── Create Pass sheet ─────────────────────────────────────────────────────────
+// â”€â”€ Create Pass sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CreatePassSheet({
   open, currentUser, onClose, onCreate,
@@ -330,9 +330,9 @@ function CreatePassSheet({
         <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-4">
           {/* Info hint */}
           <div className="p-3 bg-blue-50 rounded-xl text-xs text-blue-700 leading-relaxed space-y-0.5">
-            <p><strong>Visitor Pass</strong> → Fill in the visitor's information</p>
-            <p><strong>Worker Pass</strong> → Fill in the worker's information</p>
-            <p><strong>Event Pass</strong> → Fill in the host's information</p>
+            <p><strong>Visitor Pass</strong> â†’ Fill in the visitor's information</p>
+            <p><strong>Worker Pass</strong> â†’ Fill in the worker's information</p>
+            <p><strong>Event Pass</strong> â†’ Fill in the host's information</p>
           </div>
 
           {/* Pass Type */}
@@ -376,7 +376,7 @@ function CreatePassSheet({
           {/* Email */}
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-gray-700">
-              Email <span className="font-normal text-gray-400 text-xs">— not required if they have WhatsApp</span>
+              Email <span className="font-normal text-gray-400 text-xs">â€” not required if they have WhatsApp</span>
             </label>
             <input
               type="email" value={email} onChange={(e) => setEmail(e.target.value)}
@@ -412,7 +412,7 @@ function CreatePassSheet({
           {/* Extended pass toggle */}
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-gray-700">
-              Extended Pass? <span className="font-normal text-gray-400 text-xs">— more than 1 day</span>
+              Extended Pass? <span className="font-normal text-gray-400 text-xs">â€” more than 1 day</span>
             </label>
             <div className="flex gap-2">
               {(['No', 'Yes'] as const).map((opt) => (
@@ -442,7 +442,7 @@ function CreatePassSheet({
             />
           </div>
 
-          {/* Departure Date + ID photo — extended only */}
+          {/* Departure Date + ID photo â€” extended only */}
           {extended && (
             <>
               <div className="space-y-1.5">
@@ -456,7 +456,7 @@ function CreatePassSheet({
 
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-700">
-                  ID Photo * <span className="font-normal text-gray-400 text-xs">— required for extended passes</span>
+                  ID Photo * <span className="font-normal text-gray-400 text-xs">â€” required for extended passes</span>
                 </label>
                 {idPhoto ? (
                   <div className="relative">
@@ -496,7 +496,7 @@ function CreatePassSheet({
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function GatePage() {
   const navigate = useNavigate()
@@ -523,7 +523,7 @@ export default function GatePage() {
         <PassDetailView pass={viewPass} onClose={() => setViewPass(null)} />
       )}
 
-      <div className="min-h-svh flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-gray-50">
 
         {/* Top bar */}
         <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 safe-top">
@@ -564,3 +564,4 @@ export default function GatePage() {
     </>
   )
 }
+

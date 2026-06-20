@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import type { GatePass } from '@/store/gateStore'
 import { PASS_TYPE_CONFIG, PASS_REASON_LABELS } from '@/store/gateStore'
@@ -47,7 +47,7 @@ export default function PassSharePage() {
 
   if (!pass) {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center bg-gray-100 px-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-6 text-center">
         <p className="text-xl font-bold text-gray-800 mb-2">Invalid Pass</p>
         <p className="text-sm text-gray-500">This link is invalid or may have been corrupted.</p>
         <p className="text-xs text-gray-400 mt-2">Please ask the resident to re-share the pass.</p>
@@ -68,11 +68,11 @@ export default function PassSharePage() {
     : 0
 
   return (
-    <div className="min-h-svh flex flex-col bg-gray-100 safe-top safe-bottom">
+    <div className="min-h-screen flex flex-col bg-gray-100 safe-top safe-bottom">
 
       {/* Community header */}
       <div className="px-6 pt-10 pb-8 text-white" style={{ backgroundColor: PRIMARY }}>
-        <p className="text-[11px] font-bold tracking-widest opacity-60 uppercase">Pura Maracay · Ecovilla</p>
+        <p className="text-[11px] font-bold tracking-widest opacity-60 uppercase">Pura Maracay Â· Ecovilla</p>
         <p className="text-3xl font-black tracking-wide mt-1">GATE PASS</p>
         <div className="mt-3">
           {expired && (
@@ -134,7 +134,7 @@ export default function PassSharePage() {
               <p className="text-[10px] uppercase tracking-wider text-gray-400">Valid</p>
               <p className="text-sm font-semibold text-gray-800 leading-snug">
                 {pass.extended
-                  ? `${fmtDate(pass.arrivalDate)} –\n${fmtDate(pass.departureDate)}`
+                  ? `${fmtDate(pass.arrivalDate)} â€“\n${fmtDate(pass.departureDate)}`
                   : fmtDate(pass.arrivalDate)}
               </p>
             </div>
@@ -171,24 +171,24 @@ export default function PassSharePage() {
           >
             {result.ok
               ? result.action === 'enter'
-                ? 'Gate opened for entry — please proceed!'
-                : 'Gate opened for exit — safe travels!'
+                ? 'Gate opened for entry â€” please proceed!'
+                : 'Gate opened for exit â€” safe travels!'
               : 'Could not reach the gate. Please try again or call the resident.'}
           </div>
         )}
 
         {isPending && (
           <div className="bg-amber-50 rounded-2xl border border-amber-200 px-4 py-3 flex items-start gap-2">
-            <span className="text-amber-500 mt-0.5">⏳</span>
+            <span className="text-amber-500 mt-0.5">â³</span>
             <p className="text-sm text-amber-700">
-              Pending admin approval · valid for another <strong>{hoursLeft}h</strong>
+              Pending admin approval Â· valid for another <strong>{hoursLeft}h</strong>
             </p>
           </div>
         )}
 
         {expiredWithoutApproval ? (
           <div className="bg-amber-50 rounded-2xl border border-amber-200 p-6 text-center">
-            <p className="text-base font-semibold text-amber-700">Pass Expired — Not Approved</p>
+            <p className="text-base font-semibold text-amber-700">Pass Expired â€” Not Approved</p>
             <p className="text-sm text-amber-600 mt-1">
               This extended pass was not approved within 48 hours. Please contact the resident for a new pass.
             </p>
@@ -216,7 +216,7 @@ export default function PassSharePage() {
               className="flex-1 py-7 rounded-2xl text-white text-2xl font-black disabled:opacity-50 transition-opacity active:opacity-80 shadow-md"
               style={{ backgroundColor: PRIMARY }}
             >
-              {loading === 'enter' ? '…' : 'ENTER'}
+              {loading === 'enter' ? 'â€¦' : 'ENTER'}
             </button>
             <button
               onClick={() => handleGate('exit')}
@@ -224,7 +224,7 @@ export default function PassSharePage() {
               className="flex-1 py-7 rounded-2xl text-white text-2xl font-black disabled:opacity-50 transition-opacity active:opacity-80 shadow-md"
               style={{ backgroundColor: AMBER }}
             >
-              {loading === 'exit' ? '…' : 'EXIT'}
+              {loading === 'exit' ? 'â€¦' : 'EXIT'}
             </button>
           </div>
         )}
@@ -232,8 +232,9 @@ export default function PassSharePage() {
 
       {/* Footer */}
       <div className="flex-1 flex items-end justify-center pb-8 pt-6">
-        <p className="text-[10px] text-gray-400 tracking-wider">LEV PORTAL · PURA MARACAY · ECOVILLA</p>
+        <p className="text-[10px] text-gray-400 tracking-wider">LEV PORTAL Â· PURA MARACAY Â· ECOVILLA</p>
       </div>
     </div>
   )
 }
+

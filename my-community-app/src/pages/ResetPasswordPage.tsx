@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -53,18 +53,18 @@ export default function ResetPasswordPage() {
     }
   }
 
-  /* ── Password updated ── */
+  /* â”€â”€ Password updated â”€â”€ */
   if (done) {
     return (
       <div
-        className="min-h-svh flex flex-col items-center justify-center px-6 text-center safe-top safe-bottom"
+        className="min-h-screen flex flex-col items-center justify-center px-6 text-center safe-top safe-bottom"
         style={{ backgroundColor: PAGE_BG }}
       >
         <div
           className="w-16 h-16 rounded-full flex items-center justify-center mb-5 text-white text-3xl font-bold"
           style={{ backgroundColor: PRIMARY }}
         >
-          ✓
+          âœ“
         </div>
         <h2 className="text-xl font-bold text-gray-800">Password updated!</h2>
         <p className="text-gray-500 text-sm mt-2">You can now sign in with your new password.</p>
@@ -79,15 +79,15 @@ export default function ResetPasswordPage() {
     )
   }
 
-  /* ── Loading / validating link ── */
+  /* â”€â”€ Loading / validating link â”€â”€ */
   if (hasSession === null || hasSession === false) {
     return (
       <div
-        className="min-h-svh flex flex-col items-center justify-center px-6 text-center safe-top safe-bottom"
+        className="min-h-screen flex flex-col items-center justify-center px-6 text-center safe-top safe-bottom"
         style={{ backgroundColor: PAGE_BG }}
       >
         {hasSession === null ? (
-          <p className="text-gray-500 text-sm">Validating reset link…</p>
+          <p className="text-gray-500 text-sm">Validating reset linkâ€¦</p>
         ) : (
           <>
             <p className="text-gray-700 font-semibold">Link expired or invalid</p>
@@ -105,9 +105,9 @@ export default function ResetPasswordPage() {
     )
   }
 
-  /* ── New password form ── */
+  /* â”€â”€ New password form â”€â”€ */
   return (
-    <div className="min-h-svh flex flex-col" style={{ backgroundColor: PAGE_BG }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: PAGE_BG }}>
 
       <header className="safe-top px-4 pt-4 pb-6" style={{ backgroundColor: PRIMARY }}>
         <h1 className="text-white text-2xl font-bold">Set New Password</h1>
@@ -139,7 +139,7 @@ export default function ResetPasswordPage() {
             <input
               type="password" required value={confirmPw}
               onChange={e => setConfirmPw(e.target.value)}
-              placeholder="••••••••"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
               className={inputCls} autoComplete="new-password"
             />
           </div>
@@ -155,7 +155,7 @@ export default function ResetPasswordPage() {
             className="w-full py-3.5 rounded-xl text-white font-bold text-sm transition-opacity disabled:opacity-60"
             style={{ backgroundColor: PRIMARY }}
           >
-            {loading ? 'Updating…' : 'Update Password'}
+            {loading ? 'Updatingâ€¦' : 'Update Password'}
           </button>
 
         </form>
@@ -163,3 +163,4 @@ export default function ResetPasswordPage() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   PhoneCall, Mail, Newspaper, FileText,
@@ -133,7 +133,7 @@ export default function DashboardPage() {
   }, [])
 
   async function handleGate(action: 'enter' | 'exit') {
-    // Disable the tapped button for 5 s — independent per gate
+    // Disable the tapped button for 5 s â€” independent per gate
     if (action === 'enter') {
       setEnterCooldown(true)
       setTimeout(() => setEnterCooldown(false), 5000)
@@ -162,7 +162,7 @@ export default function DashboardPage() {
   const bottomTiles = visibleTiles.slice(12)
 
   return (
-    <div className="min-h-svh flex flex-col" style={{ backgroundColor: PAGE_BG }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: PAGE_BG }}>
 
       {/* Header */}
       <header
@@ -186,7 +186,7 @@ export default function DashboardPage() {
               className="inline-block mt-1 text-xs font-medium px-2.5 py-0.5 rounded-full text-white/80"
               style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}
             >
-              {roleBadge}{lot ? ` · Lot ${lot}` : ''}
+              {roleBadge}{lot ? ` Â· Lot ${lot}` : ''}
             </span>
           </div>
           <button
@@ -342,3 +342,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+

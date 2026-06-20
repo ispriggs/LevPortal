@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { Check } from 'lucide-react'
@@ -92,11 +92,11 @@ export default function SignUpPage() {
     }
   }
 
-  /* ── Success ── */
+  /* â”€â”€ Success â”€â”€ */
   if (done) {
     return (
       <div
-        className="min-h-svh flex flex-col items-center justify-center px-6 text-center"
+        className="min-h-screen flex flex-col items-center justify-center px-6 text-center"
         style={{ backgroundColor: PAGE_BG }}
       >
         <div
@@ -123,9 +123,9 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-svh flex flex-col" style={{ backgroundColor: PAGE_BG }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: PAGE_BG }}>
 
-      {/* Green header — ~30% of screen */}
+      {/* Green header â€” ~30% of screen */}
       <div
         className="relative overflow-hidden px-6 pt-10 pb-5 rounded-b-3xl flex flex-col justify-end"
         style={{ backgroundColor: PRIMARY, minHeight: '28svh' }}
@@ -230,8 +230,8 @@ export default function SignUpPage() {
                 <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-3">I AM A *</p>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { value: 'owner', emoji: '🏠', label: 'Owner', sub: 'Property owner' },
-                    { value: 'renter', emoji: '🔑', label: 'Renter', sub: 'Temp. renter' },
+                    { value: 'owner', emoji: 'ðŸ ', label: 'Owner', sub: 'Property owner' },
+                    { value: 'renter', emoji: 'ðŸ”‘', label: 'Renter', sub: 'Temp. renter' },
                   ].map(({ value, emoji, label, sub }) => (
                     <button
                       key={value}
@@ -344,14 +344,14 @@ export default function SignUpPage() {
               className="w-full py-4 rounded-full font-bold text-base text-white transition-opacity disabled:opacity-60"
               style={{ backgroundColor: PRIMARY }}
             >
-              {loading ? 'Creating account…' : 'Create Account →'}
+              {loading ? 'Creating accountâ€¦' : 'Create Account â†’'}
             </button>
             <button
               type="button"
               onClick={handleBack}
               className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors"
             >
-              ← Back
+              â† Back
             </button>
           </div>
         ) : (
@@ -361,7 +361,7 @@ export default function SignUpPage() {
               onClick={handleBack}
               className="text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors"
             >
-              ← {step === 1 ? 'Login' : 'Back'}
+              â† {step === 1 ? 'Login' : 'Back'}
             </button>
             <button
               type="button"
@@ -369,7 +369,7 @@ export default function SignUpPage() {
               className="px-8 py-3.5 rounded-full font-bold text-sm text-white transition-opacity active:opacity-80"
               style={{ backgroundColor: PRIMARY }}
             >
-              Continue →
+              Continue â†’
             </button>
           </div>
         )}
@@ -377,3 +377,4 @@ export default function SignUpPage() {
     </div>
   )
 }
+
