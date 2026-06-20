@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+﻿import { useState, useRef, useEffect } from 'react'
 import { X, Send } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
 import type { Poll, Comment } from '@/pages/VotingPage'
@@ -49,8 +49,8 @@ export default function PollCommentsSheet({ poll, onClose, onAddComment }: Props
       />
 
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
-        style={{ maxHeight: '85vh', minHeight: '40vh', transform: isOpen ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 sheet-safe-bottom"
+        style={{ maxHeight: 'calc(85vh - var(--keyboard-h, 0px))', minHeight: '40vh', transform: isOpen ? 'translateY(0)' : 'translateY(100%)' }}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3">
@@ -98,7 +98,7 @@ export default function PollCommentsSheet({ poll, onClose, onAddComment }: Props
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder={`Comment as ${displayName}…`}
+            placeholder={`Comment as ${displayName}â€¦`}
             className="flex-1 border border-gray-300 rounded-full px-4 py-2.5 text-base text-gray-900 outline-none focus:border-green-700"
           />
           <button
@@ -114,3 +114,4 @@ export default function PollCommentsSheet({ poll, onClose, onAddComment }: Props
     </>
   )
 }
+

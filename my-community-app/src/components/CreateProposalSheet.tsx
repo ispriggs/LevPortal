@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { X, Image } from 'lucide-react'
 
 const PRIMARY = '#243d20'
@@ -99,8 +99,8 @@ export default function CreateProposalSheet({ open, onClose, onSaveDraft, onSubm
         onClick={onClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
-        style={{ maxHeight: '85vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 sheet-safe-bottom"
+        style={{ maxHeight: 'calc(85vh - var(--keyboard-h, 0px))', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 flex-shrink-0">
@@ -286,7 +286,7 @@ export default function CreateProposalSheet({ open, onClose, onSaveDraft, onSubm
             disabled={!canDraft || saving}
             className="flex-1 py-3.5 rounded-xl border-2 border-gray-300 text-gray-700 text-sm font-semibold disabled:opacity-40"
           >
-            {saving ? 'Saving…' : 'Save as Draft'}
+            {saving ? 'Saving...' : 'Save as Draft'}
           </button>
           <button
             onClick={handleSubmit}
@@ -294,10 +294,11 @@ export default function CreateProposalSheet({ open, onClose, onSaveDraft, onSubm
             className="flex-1 py-3.5 rounded-xl text-white text-sm font-semibold disabled:opacity-40"
             style={{ backgroundColor: PRIMARY }}
           >
-            {submitting ? 'Submitting…' : 'Submit'}
+            {submitting ? 'Submitting...' : 'Submit'}
           </button>
         </div>
       </div>
     </>
   )
 }
+

@@ -5,6 +5,7 @@ import { useAuthStore, getDisplayName } from '@/store/authStore'
 import CreatePollSheet, { type CreatePollData, type PollAudience } from '@/components/CreatePollSheet'
 import PollCommentsSheet from '@/components/PollCommentsSheet'
 import { supabase } from '@/lib/supabase'
+import { useToastStore } from '@/store/toastStore'
 
 const PRIMARY = '#243d20'
 
@@ -35,18 +36,20 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-// â”€â”€ Poll card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Poll card â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 function PollCard({
   poll,
   myVote,
   onVote,
   onCommentOpen,
+  onRetractVote,
 }: {
   poll: Poll
   myVote: string | undefined
   onVote: (pollId: string, optionId: string) => void
   onCommentOpen: (poll: Poll) => void
+  onRetractVote: (pollId: string) => void
 }) {
   const active = isPollActive(poll)
   const total = poll.options.reduce((s, o) => s + o.votes, 0)
@@ -184,9 +187,19 @@ function PollCard({
           <p className="text-xs text-gray-400 mt-2 text-center">This poll is closed.</p>
         )}
         {hasVoted && (
-          <p className="text-xs text-center mt-2" style={{ color: PRIMARY }}>
-            âœ“ You voted on this poll
-          </p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-xs" style={{ color: PRIMARY }}>
+              âœ" You voted on this poll
+            </p>
+            {active && (
+              <button
+                onClick={() => onRetractVote(poll.id)}
+                className="text-xs text-red-400 font-medium active:opacity-70"
+              >
+                Retract vote
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -202,12 +215,13 @@ function PollCard({
   )
 }
 
-// â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Page â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 export default function VotingPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const displayName = getDisplayName(user)
+  const showToast = useToastStore((s) => s.showToast)
 
   const [polls, setPolls] = useState<Poll[]>([])
   const [myVotes, setMyVotes] = useState<Record<string, string>>({})
@@ -301,6 +315,27 @@ export default function VotingPage() {
         }
       )
     )
+    showToast('Vote recorded!')
+  }
+
+  async function handleRetractVote(pollId: string) {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) return
+    const optionId = myVotes[pollId]
+    if (!optionId) return
+    await supabase.from('poll_votes').delete().eq('poll_id', pollId).eq('user_id', authUser.id)
+    setMyVotes((prev) => { const next = { ...prev }; delete next[pollId]; return next })
+    setPolls((prev) =>
+      prev.map((p) =>
+        p.id !== pollId ? p : {
+          ...p,
+          options: p.options.map((o) =>
+            o.id === optionId ? { ...o, votes: Math.max(0, o.votes - 1) } : o
+          ),
+        }
+      )
+    )
+    showToast('Vote retracted.')
   }
 
   async function handleCreatePoll(data: CreatePollData) {
@@ -342,6 +377,7 @@ export default function VotingPage() {
       comments: [],
     }
     setPolls((prev) => [newPoll, ...prev])
+    showToast('Poll created!')
   }
 
   async function handleAddComment(pollId: string, text: string) {
@@ -413,6 +449,7 @@ export default function VotingPage() {
               myVote={myVotes[poll.id]}
               onVote={handleVote}
               onCommentOpen={setCommentPoll}
+              onRetractVote={handleRetractVote}
             />
           ))}
         </div>

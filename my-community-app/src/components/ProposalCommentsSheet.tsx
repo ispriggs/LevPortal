@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { X, Trash2, Send } from 'lucide-react'
 import type { Proposal, ProposalComment } from '@/pages/ProposalsPage'
 
@@ -44,8 +44,8 @@ export default function ProposalCommentsSheet({
         onClick={onClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
-        style={{ maxHeight: '85vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 sheet-safe-bottom"
+        style={{ maxHeight: 'calc(85vh - var(--keyboard-h, 0px))', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="flex justify-center pt-3">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -104,7 +104,7 @@ export default function ProposalCommentsSheet({
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Write a comment…"
+            placeholder="Write a comment..."
             rows={1}
             className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
             style={{ maxHeight: '96px' }}
@@ -127,3 +127,4 @@ export default function ProposalCommentsSheet({
     </>
   )
 }
+

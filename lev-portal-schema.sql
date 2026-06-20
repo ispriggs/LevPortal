@@ -664,6 +664,104 @@ create policy "Authenticated users can upload gate ID photos"
 
 
 -- ════════════════════════════════════════════════════════════════
+-- 9. PROPOSALS
+-- ════════════════════════════════════════════════════════════════
+create table if not exists public.proposals (
+  id                    uuid        primary key default gen_random_uuid(),
+  created_by            uuid        not null references auth.users on delete cascade,
+  category              text        not null,
+  title                 text        not null,
+  description           text        not null default '',
+  supporters            text,
+  problem_solution      text,
+  implementation_team   text,
+  implementation_plan   text,
+  timeline              text,
+  long_term_management  text,
+  costs                 text,
+  photo_url             text,
+  photo_path            text,
+  status                text        not null default 'draft'
+                          check (status in ('draft', 'pending', 'approved', 'rejected')),
+  created_at            timestamptz not null default now(),
+  updated_at            timestamptz not null default now()
+);
+
+alter table public.proposals enable row level security;
+
+create policy "Users can read approved proposals or own proposals"
+  on public.proposals for select
+  to authenticated
+  using (status = 'approved' or created_by = auth.uid() or public.user_role() = 'owner');
+
+create policy "Authenticated users can create proposals"
+  on public.proposals for insert
+  to authenticated with check (created_by = auth.uid());
+
+create policy "Users can update own proposals; owners can update any"
+  on public.proposals for update
+  to authenticated
+  using (created_by = auth.uid() or public.user_role() = 'owner');
+
+create policy "Users can delete own proposals; owners can delete any"
+  on public.proposals for delete
+  to authenticated
+  using (created_by = auth.uid() or public.user_role() = 'owner');
+
+
+-- ── Proposal comments ─────────────────────────────────────────
+create table if not exists public.proposal_comments (
+  id          uuid        primary key default gen_random_uuid(),
+  proposal_id uuid        not null references public.proposals on delete cascade,
+  author_id   uuid        not null references auth.users on delete cascade,
+  text        text        not null,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.proposal_comments enable row level security;
+
+create policy "Authenticated users can read proposal comments"
+  on public.proposal_comments for select
+  to authenticated using (true);
+
+create policy "Authenticated users can add proposal comments"
+  on public.proposal_comments for insert
+  to authenticated with check (author_id = auth.uid());
+
+create policy "Authors and owners can delete proposal comments"
+  on public.proposal_comments for delete
+  to authenticated
+  using (author_id = auth.uid() or public.user_role() = 'owner');
+
+
+-- ════════════════════════════════════════════════════════════════
+-- 10. ANNOUNCEMENTS
+-- ════════════════════════════════════════════════════════════════
+create table if not exists public.announcements (
+  id         uuid        primary key default gen_random_uuid(),
+  title      text        not null,
+  body       text,
+  created_by uuid        not null references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null
+);
+
+alter table public.announcements enable row level security;
+
+create policy "Authenticated users can read announcements"
+  on public.announcements for select
+  to authenticated using (true);
+
+create policy "Owners can create announcements"
+  on public.announcements for insert
+  to authenticated with check (public.user_role() = 'owner');
+
+create policy "Owners can delete announcements"
+  on public.announcements for delete
+  to authenticated using (public.user_role() = 'owner');
+
+
+-- ════════════════════════════════════════════════════════════════
 -- ⚠ PRODUCTION NOTE: Hardening owner role
 -- ════════════════════════════════════════════════════════════════
 -- Currently role is self-reported at signup (user_metadata), so a

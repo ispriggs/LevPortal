@@ -7,6 +7,7 @@ import UploadDocumentSheet, {
   type DocFolder, type DocAccess, type UploadDocData,
 } from '@/components/UploadDocumentSheet'
 import { supabase } from '@/lib/supabase'
+import { useToastStore } from '@/store/toastStore'
 
 const PRIMARY = '#243d20'
 
@@ -108,6 +109,7 @@ export default function DocumentsPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const isAdmin = useAuthStore((s) => s.isAdmin)
+  const showToast = useToastStore((s) => s.showToast)
   const displayName = getDisplayName(user)
   const isOwner = getRole(user) === 'owner'
   const isRenter = !isOwner
@@ -181,7 +183,8 @@ export default function DocumentsPage() {
       .select()
       .single()
 
-    if (!row) return
+    if (!row) { showToast('Upload failed — please try again.', 'error'); return }
+    showToast('Document submitted — pending admin approval.')
     setUploadedPending(true)
     setTimeout(() => setUploadedPending(false), 5000)
   }

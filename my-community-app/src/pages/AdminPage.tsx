@@ -18,6 +18,7 @@ import {
   PASS_TYPE_CONFIG, PASS_REASON_LABELS,
 } from '@/store/gateStore'
 import type { ProposalComment } from '@/pages/ProposalsPage'
+import { useToastStore } from '@/store/toastStore'
 
 const PRIMARY = '#243d20'
 const RED = '#c03828'
@@ -94,7 +95,7 @@ function MessageSheet({
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-40" style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity .3s' }} onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl safe-bottom" style={{ maxHeight: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl sheet-safe-bottom" style={{ maxHeight: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-gray-300 rounded-full" /></div>
         <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100">
           <h2 className="text-base font-bold text-gray-900">Send Message</h2>
@@ -131,7 +132,7 @@ function SignupDeclineSheet({
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-40" style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity .3s' }} onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl safe-bottom" style={{ maxHeight: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl sheet-safe-bottom" style={{ maxHeight: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-gray-300 rounded-full" /></div>
         <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100">
           <h2 className="text-base font-bold text-gray-900">Decline Signup</h2>
@@ -183,7 +184,7 @@ function DocPreviewSheet({
         onClick={onClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 sheet-safe-bottom"
         style={{ height: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         {/* Drag handle */}
@@ -652,7 +653,7 @@ function PassDeclineSheet({
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-40" style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity .3s' }} onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl safe-bottom" style={{ maxHeight: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl sheet-safe-bottom" style={{ maxHeight: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-gray-300 rounded-full" /></div>
         <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100">
           <h2 className="text-base font-bold text-gray-900">Decline Extended Pass</h2>
@@ -747,6 +748,7 @@ export default function AdminPage() {
   const user = useAuthStore((s) => s.user)
   const adminName = getDisplayName(user)
   const startThread = useMessagesStore((s) => s.startThread)
+  const showToast = useToastStore((s) => s.showToast)
 
   const { tickets: allTickets, updateStatus: storeUpdateStatus, addComment: storeAddComment, fetchTickets } = useTicketsStore()
   const { passes: allPasses, approvePass, declinePass: storeDeclinePass, fetchPasses } = useGateStore()
@@ -754,7 +756,8 @@ export default function AdminPage() {
   async function handleDeclinePass(passId: string, reason: string) {
     const pass = allPasses.find((p) => p.id === passId)
     await storeDeclinePass(passId)
-    if (pass) setMsgSheet({ to: pass.createdBy, subject: `Re: Extended Pass Declined â€” ${pass.visitorName} Â· ${reason}` })
+    showToast('Extended pass declined and removed.')
+    if (pass) setMsgSheet({ to: pass.createdBy, subject: `Re: Extended Pass Declined — ${pass.visitorName} · ${reason}` })
   }
 
   useEffect(() => {
@@ -882,6 +885,7 @@ export default function AdminPage() {
     setAnnBody('')
     setAnnExpiry('')
     setAnnPosting(false)
+    showToast('Announcement posted.')
     loadAnnouncements()
   }
 
@@ -909,6 +913,7 @@ export default function AdminPage() {
   async function approveDoc(id: string) {
     await supabase.from('documents').update({ status: 'approved' }).eq('id', id)
     setDocs((p) => p.filter((d) => d.id !== id))
+    showToast('Document approved.')
   }
   async function declineDoc(id: string) {
     const doc = docs.find((d) => d.id === id)!
@@ -917,7 +922,8 @@ export default function AdminPage() {
       doc.filePath ? supabase.storage.from('documents').remove([doc.filePath]) : Promise.resolve(),
     ])
     setDocs((p) => p.filter((d) => d.id !== id))
-    setMsgSheet({ to: doc.uploadedBy, subject: `Re: Document declined â€” ${doc.title}` })
+    showToast('Document declined and removed.')
+    setMsgSheet({ to: doc.uploadedBy, subject: `Re: Document declined — ${doc.title}` })
   }
 
   // â”€â”€ Signup actions
@@ -935,12 +941,14 @@ export default function AdminPage() {
   async function approveProposal(id: string) {
     await supabase.from('proposals').update({ status: 'approved' }).eq('id', id)
     setProposals((prev) => prev.filter((x) => x.id !== id))
+    showToast('Proposal approved and published.')
   }
   async function rejectProposal(id: string) {
     const p = proposals.find((x) => x.id === id)!
     await supabase.from('proposals').update({ status: 'rejected' }).eq('id', id)
     setProposals((prev) => prev.filter((x) => x.id !== id))
-    setMsgSheet({ to: p.submittedBy, subject: `Re: Proposal not approved â€” ${p.title}` })
+    showToast('Proposal declined.')
+    setMsgSheet({ to: p.submittedBy, subject: `Re: Proposal not approved — ${p.title}` })
   }
   async function addProposalComment(proposalId: string, text: string) {
     if (!user?.id) return
@@ -1156,7 +1164,7 @@ export default function AdminPage() {
                 <ExtendedPassCard
                   key={p.id}
                   pass={p}
-                  onApprove={() => approvePass(p.id)}
+                  onApprove={async () => { await approvePass(p.id); showToast('Extended pass approved!') }}
                   onDecline={() => setDeclinePassTarget(p)}
                 />
               ))}
@@ -1222,4 +1230,5 @@ export default function AdminPage() {
     </div>
   )
 }
+
 

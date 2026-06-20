@@ -94,6 +94,7 @@ type GateStore = {
   createPass:  (data: CreatePassData) => Promise<GatePass | null>
   approvePass: (passId: string) => Promise<void>
   declinePass: (passId: string) => Promise<void>
+  deletePass:  (passId: string) => Promise<void>
 }
 
 export const useGateStore = create<GateStore>()((set) => ({
@@ -160,6 +161,13 @@ export const useGateStore = create<GateStore>()((set) => ({
   },
 
   declinePass: async (passId) => {
+    await supabase.from('gate_passes').delete().eq('id', passId)
+    set((s) => ({
+      passes: s.passes.filter((p) => p.id !== passId),
+    }))
+  },
+
+  deletePass: async (passId) => {
     await supabase.from('gate_passes').delete().eq('id', passId)
     set((s) => ({
       passes: s.passes.filter((p) => p.id !== passId),

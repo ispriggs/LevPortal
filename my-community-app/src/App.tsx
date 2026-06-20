@@ -1,4 +1,26 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
+
+function KeyboardObserver() {
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    function update() {
+      const h = Math.max(0, window.innerHeight - vv!.height)
+      document.documentElement.style.setProperty('--keyboard-h', `${h}px`)
+    }
+    update()
+    vv.addEventListener('resize', update)
+    return () => vv.removeEventListener('resize', update)
+  }, [])
+  return null
+}
 import ProtectedRoute from '@/components/ProtectedRoute'
 import LoginPage from '@/pages/LoginPage'
 import SignInPage from '@/pages/SignInPage'
@@ -19,6 +41,9 @@ import ProposalsPage from '@/pages/ProposalsPage'
 
 export default function App() {
   return (
+    <>
+    <ScrollToTop />
+    <KeyboardObserver />
     <Routes>
       <Route path="/login"           element={<LoginPage />} />
       <Route path="/signin"          element={<SignInPage />} />
@@ -45,5 +70,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }

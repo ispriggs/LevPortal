@@ -1,11 +1,12 @@
 ﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { ArrowLeft, Plus, MessageCircle, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
 import CreatePostSheet from '@/components/CreatePostSheet'
 import NewsCommentsSheet from '@/components/NewsCommentsSheet'
 import type { CreatePostData } from '@/components/CreatePostSheet'
 import { supabase } from '@/lib/supabase'
+import { useToastStore } from '@/store/toastStore'
 
 const PRIMARY = '#243d20'
 
@@ -40,14 +41,18 @@ function formatDate(iso: string) {
   })
 }
 
-// â”€â”€ Post card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Post card â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 function PostCard({
   post,
   onCommentOpen,
+  isOwn,
+  onDelete,
 }: {
   post: NewsPost
   onCommentOpen: (post: NewsPost) => void
+  isOwn: boolean
+  onDelete: (id: string) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const needsExpansion = post.content.length > 220 || post.content.split('\n').length > 4
@@ -55,7 +60,7 @@ function PostCard({
   return (
     <div className="bg-white rounded-2xl border border-gray-400 overflow-hidden">
 
-      {/* Card header â€” avatar, name, date */}
+      {/* Card header â€" avatar, name, date */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
         <div
           className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold text-base"
@@ -63,10 +68,15 @@ function PostCard({
         >
           {post.author.charAt(0).toUpperCase()}
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-bold text-gray-900 leading-tight">{post.author}</p>
           <p className="text-xs text-gray-400 mt-0.5">{formatDate(post.createdAt)}</p>
         </div>
+        {isOwn && (
+          <button onClick={() => onDelete(post.id)} className="p-1.5 text-red-400 active:opacity-70 flex-shrink-0" aria-label="Delete post">
+            <Trash2 size={17} />
+          </button>
+        )}
       </div>
 
       {/* Post body */}
@@ -94,7 +104,7 @@ function PostCard({
         )}
       </div>
 
-      {/* Image â€” always visible, text expands above it */}
+      {/* Image â€" always visible, text expands above it */}
       {post.imageUrl && (
         <img
           src={post.imageUrl}
@@ -122,12 +132,13 @@ function PostCard({
   )
 }
 
-// â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Page â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 export default function NewsPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const displayName = getDisplayName(user)
+  const showToast = useToastStore((s) => s.showToast)
 
   const [posts, setPosts] = useState<NewsPost[]>([])
   const [createOpen, setCreateOpen] = useState(false)
@@ -223,6 +234,13 @@ export default function NewsPage() {
     )
   }
 
+  async function handleDeletePost(postId: string) {
+    await supabase.from('news_posts').delete().eq('id', postId)
+    setPosts((prev) => prev.filter((p) => p.id !== postId))
+    if (commentPost?.id === postId) setCommentPost(null)
+    showToast('Post deleted.')
+  }
+
   async function handleDeleteComment(postId: string, commentId: string) {
     await supabase.from('news_comments').delete().eq('id', commentId)
 
@@ -254,7 +272,7 @@ export default function NewsPage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Community Newsfeed</h1>
         <p className="text-sm text-gray-500 mb-4 leading-relaxed">
           Stay connected with everything happening at Ecovilla! Our community newsfeed shares
-          updates, events, announcements, and stories from neighbours â€” keeping everyone in the loop.
+          updates, events, announcements, and stories from neighbours â€" keeping everyone in the loop.
         </p>
         <div className="flex justify-end mb-4">
           <button
@@ -273,6 +291,8 @@ export default function NewsPage() {
             <PostCard
               key={post.id}
               post={post}
+              isOwn={post.author === displayName}
+              onDelete={handleDeletePost}
               onCommentOpen={setCommentPost}
             />
           ))}

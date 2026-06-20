@@ -91,6 +91,7 @@ type TicketsStore = {
   submitTicket:  (data: SubmitTicketData) => Promise<string | null>
   updateStatus:  (ticketId: string, newStatus: TicketStatus, actor: string) => Promise<void>
   addComment:    (ticketId: string, actor: string, text: string, isAdmin: boolean) => Promise<void>
+  deleteTicket:  (ticketId: string) => Promise<void>
 }
 
 export const useTicketsStore = create<TicketsStore>()((set, get) => ({
@@ -210,6 +211,13 @@ export const useTicketsStore = create<TicketsStore>()((set, get) => ({
       tickets: s.tickets.map((t) =>
         t.id !== ticketId ? t : { ...t, history: [...t.history, entry] }
       ),
+    }))
+  },
+
+  deleteTicket: async (ticketId) => {
+    await supabase.from('tickets').delete().eq('id', ticketId)
+    set((s) => ({
+      tickets: s.tickets.filter((t) => t.id !== ticketId),
     }))
   },
 }))

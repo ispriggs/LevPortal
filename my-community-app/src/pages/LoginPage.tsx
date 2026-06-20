@@ -8,26 +8,31 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-between px-6 pt-20 pb-16 safe-bottom"
-      style={{ background: BG }}
-    >
+    <div style={{ position: 'fixed', inset: 0, background: BG, display: 'flex', flexDirection: 'column' }}>
+      <div
+        className="flex flex-col flex-1 items-center justify-between w-full max-w-sm mx-auto"
+        style={{
+          paddingLeft:   'max(24px, env(safe-area-inset-left))',
+          paddingRight:  'max(24px, env(safe-area-inset-right))',
+          paddingTop:    'max(60px, env(safe-area-inset-top))',
+          paddingBottom: 'max(48px, env(safe-area-inset-bottom))',
+        }}
+      >
         {/* Logo + name */}
         <div className="flex flex-col items-center gap-4 flex-1 justify-center">
           <img
             src={levLogo}
             alt="LEV"
-            className="h-32 w-auto sm:h-44"
-            style={{ filter: 'brightness(0) invert(1)' }}
+            style={{ height: 'min(8rem, 25vh)', width: 'auto', filter: 'brightness(0) invert(1)' }}
           />
           <div className="text-center">
             <h1 className="text-white text-3xl font-bold tracking-wide">LEV Portal</h1>
-            <p className="text-white/60 text-sm mt-1">Your community, connected.</p>
+            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>Your community, connected.</p>
           </div>
         </div>
 
         {/* Buttons */}
-        <div className="w-full max-w-sm space-y-3">
+        <div className="w-full space-y-3">
           <button
             onClick={() => navigate('/signin')}
             className="w-full py-4 rounded-full font-bold text-base transition-opacity active:opacity-80"
@@ -37,11 +42,13 @@ export default function LoginPage() {
           </button>
           <button
             onClick={() => navigate('/signup')}
-            className="w-full py-4 rounded-full font-semibold text-base text-white border border-white/30 bg-white/10 transition-opacity active:opacity-80"
+            className="w-full py-4 rounded-full font-semibold text-base text-white border transition-opacity active:opacity-80"
+            style={{ borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.1)' }}
           >
             Create Account
           </button>
         </div>
       </div>
+    </div>
   )
 }

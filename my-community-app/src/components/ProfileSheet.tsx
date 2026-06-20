@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { X, LogOut } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore, getRole } from '@/store/authStore'
+import { useToastStore } from '@/store/toastStore'
 
 const PRIMARY = '#243d20'
 
@@ -15,6 +16,7 @@ export default function ProfileSheet({ open, onClose, onLogout }: Props) {
   const user = useAuthStore((s) => s.user)
   const setSession = useAuthStore((s) => s.setSession)
   const role = getRole(user)
+  const showToast = useToastStore((s) => s.showToast)
 
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
@@ -52,6 +54,7 @@ export default function ProfileSheet({ open, onClose, onLogout }: Props) {
 
     setSaving(false)
     setSaved(true)
+    showToast('Profile saved!')
     setTimeout(() => { setSaved(false); onClose() }, 800)
   }
 
@@ -61,7 +64,7 @@ export default function ProfileSheet({ open, onClose, onLogout }: Props) {
     <>
       <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl overflow-y-auto" style={{ maxHeight: '85vh', minHeight: '40vh', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="fixed left-0 right-0 z-50 bg-white rounded-t-2xl overflow-y-auto" style={{ bottom: 'var(--keyboard-h, 0px)', maxHeight: 'calc(85vh - var(--keyboard-h, 0px))', minHeight: '40vh', paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}>
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />

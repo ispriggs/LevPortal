@@ -4,7 +4,7 @@ import {
   PhoneCall, Mail, Newspaper, FileText,
   BarChart2, CalendarDays, MessageCircle, QrCode,
   ClipboardList, ShieldAlert, Users, Waves,
-  Leaf, Footprints, User, CheckCircle, AlertCircle,
+  Leaf, Footprints, User,
   LogIn, LogOut, Megaphone,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -12,9 +12,10 @@ import { useAuthStore, getDisplayName, getRole } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { triggerGate } from '@/lib/gate'
 import ProfileSheet from '@/components/ProfileSheet'
+import { useToastStore } from '@/store/toastStore'
+import maracuyaImg from '@/assets/maracuya-image.avif'
 
 const PRIMARY = '#243d20'
-const AMBER = '#d08a10'
 const PAGE_BG = '#f0f0ec'
 
 type TileData = {
@@ -23,10 +24,48 @@ type TileData = {
   Icon: LucideIcon
   bg: string
   color: string
-  badge?: number
   path: string
-  ownerOnly?: boolean  // greyed out for renters
-  adminOnly?: boolean  // hidden entirely for non-admins
+  ownerOnly?: boolean
+  adminOnly?: boolean
+}
+
+const BADGE_STORAGE_KEY = 'lev_tile_visited'
+
+function getTileLastVisited(): Record<string, number> {
+  try { return JSON.parse(localStorage.getItem(BADGE_STORAGE_KEY) ?? '{}') } catch { return {} }
+}
+
+async function safeCount(q: PromiseLike<{ count: number | null; error: unknown }>): Promise<number> {
+  try { const r = await q; return r.count ?? 0 } catch { return 0 }
+}
+
+async function fetchBadgeCounts(): Promise<Record<string, number>> {
+  const lv = getTileLastVisited()
+  const iso = (id: string) => new Date(lv[id] ?? 0).toISOString()
+
+  const [news, docs, tickets, passes, proposals, directory, adminDocs, adminPasses, adminTickets, adminProposals] =
+    await Promise.all([
+      safeCount(supabase.from('news_posts').select('id', { count: 'exact', head: true }).gt('created_at', iso('news'))),
+      safeCount(supabase.from('documents').select('id', { count: 'exact', head: true }).gt('created_at', iso('documents'))),
+      safeCount(supabase.from('tickets').select('id', { count: 'exact', head: true }).gt('created_at', iso('neighbours'))),
+      safeCount(supabase.from('gate_passes').select('id', { count: 'exact', head: true }).gt('created_at', iso('gate'))),
+      safeCount(supabase.from('proposals').select('id', { count: 'exact', head: true }).gt('created_at', iso('proposals'))),
+      safeCount(supabase.from('directory_services').select('id', { count: 'exact', head: true }).gt('created_at', iso('directory'))),
+      safeCount(supabase.from('documents').select('id', { count: 'exact', head: true }).eq('status', 'pending').gt('created_at', iso('admin'))),
+      safeCount(supabase.from('gate_passes').select('id', { count: 'exact', head: true }).eq('approval_status', 'pending').eq('extended', true).gt('created_at', iso('admin'))),
+      safeCount(supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'open').gt('created_at', iso('admin'))),
+      safeCount(supabase.from('proposals').select('id', { count: 'exact', head: true }).eq('status', 'pending').gt('created_at', iso('admin'))),
+    ])
+
+  return {
+    news,
+    documents: docs,
+    neighbours: tickets,
+    gate: passes,
+    proposals,
+    directory,
+    admin: adminDocs + adminPasses + adminTickets + adminProposals,
+  }
 }
 
 const TILES: TileData[] = [
@@ -40,18 +79,17 @@ const TILES: TileData[] = [
   { id: 'gate', label: 'Gate', Icon: QrCode, bg: '#98bcb0', color: '#387868', path: '/gate' },
   { id: 'proposals', label: 'Proposals', Icon: ClipboardList, bg: '#d8cba8', color: '#986830', path: '/proposals' },
   { id: 'ae', label: 'A&E', Icon: ShieldAlert, bg: '#f5a5a5', color: '#cc2828', path: '/ae' },
-  { id: 'admin', label: 'Admin', Icon: Users, bg: '#eeada0', color: '#c03828', path: '/admin', badge: 7, adminOnly: true },
+  { id: 'admin', label: 'Admin', Icon: Users, bg: '#eeada0', color: '#c03828', path: '/admin', adminOnly: true },
   { id: 'amenities', label: 'Amenities', Icon: Waves, bg: '#c5b5e0', color: '#6838b8', path: '/amenities' },
   { id: 'flora', label: 'Flora &\nFauna', Icon: Leaf, bg: '#a5cf95', color: '#358028', path: '/flora-fauna' },
   { id: 'hiking', label: 'Hiking', Icon: Footprints, bg: '#95bdd8', color: '#2565a8', path: '/hiking' },
 ]
 
 function Tile({
-  data,
-  disabled,
-  onClick,
+  data, badge, disabled, onClick,
 }: {
   data: TileData
+  badge: number
   disabled: boolean
   onClick: () => void
 }) {
@@ -65,9 +103,9 @@ function Tile({
         cursor: disabled ? 'default' : 'pointer',
       }}
     >
-      {data.badge !== undefined && !disabled && (
+      {badge > 0 && !disabled && (
         <span className="absolute top-1.5 right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
-          {data.badge}
+          {badge > 99 ? '99+' : badge}
         </span>
       )}
       <data.Icon size={36} color={data.color} strokeWidth={1.5} />
@@ -87,11 +125,11 @@ function LogoTile() {
       className="flex items-center justify-center w-full aspect-square rounded-xl"
       style={{ backgroundColor: '#c5ba9a' }}
     >
-      <div className="w-3/4 h-3/4 rounded-full bg-white/80 flex flex-col items-center justify-center">
-        <span className="text-[9px] font-semibold text-center leading-tight" style={{ color: '#6a6050' }}>
-          PURA{'\n'}MARACAY
-        </span>
-      </div>
+      <img
+        src={maracuyaImg}
+        alt="Maracuya"
+        className="w-4/5 h-4/5 object-contain rounded-lg"
+      />
     </div>
   )
 }
@@ -115,12 +153,12 @@ export default function DashboardPage() {
   const isRenter = role === 'renter'
   const lot = user?.user_metadata?.lot as string | undefined
   const roleBadge = isAdmin ? 'Admin' : role === 'owner' ? 'Owner' : 'Renter'
+  const showToast = useToastStore((s) => s.showToast)
   const [profileOpen, setProfileOpen] = useState(false)
   const [enterCooldown, setEnterCooldown] = useState(false)
   const [exitCooldown, setExitCooldown] = useState(false)
-  const [toast, setToast] = useState<{ action: 'enter' | 'exit'; ok: boolean } | null>(null)
-  const [toastVisible, setToastVisible] = useState(false)
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [badges, setBadges] = useState<Record<string, number>>({})
 
   useEffect(() => {
     supabase
@@ -130,7 +168,16 @@ export default function DashboardPage() {
       .order('created_at', { ascending: false })
       .limit(5)
       .then(({ data }) => { if (data) setAnnouncements(data) })
+
+    fetchBadgeCounts().then(setBadges)
   }, [])
+
+  function handleTileClick(tile: TileData) {
+    const lv = getTileLastVisited()
+    localStorage.setItem(BADGE_STORAGE_KEY, JSON.stringify({ ...lv, [tile.id]: Date.now() }))
+    setBadges((b) => ({ ...b, [tile.id]: 0 }))
+    navigate(tile.path)
+  }
 
   async function handleGate(action: 'enter' | 'exit') {
     // Disable the tapped button for 5 s â€” independent per gate
@@ -143,12 +190,11 @@ export default function DashboardPage() {
     }
 
     const ok = await triggerGate(action === 'enter')
-
-    // Slide-up toast
-    setToast({ action, ok })
-    setToastVisible(true)
-    setTimeout(() => setToastVisible(false), 3200)
-    setTimeout(() => setToast(null), 3550)
+    if (ok) {
+      showToast(action === 'enter' ? 'Enter gate opened! Please proceed.' : 'Exit gate opened! Safe travels.')
+    } else {
+      showToast('Could not reach the gate — check your connection.', 'error')
+    }
   }
 
   async function handleLogout() {
@@ -212,20 +258,21 @@ export default function DashboardPage() {
             </span>
           </div>
           <p className="text-white/50 text-xs mb-4">Tap a button to open or close the gate</p>
-          <div className="space-y-2.5">
+          <div className="flex gap-2.5">
             <button
               onClick={() => handleGate('enter')}
               disabled={enterCooldown}
-              className="w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-opacity active:opacity-80 disabled:opacity-40"
-              style={{ backgroundColor: '#F5C200', color: '#1a3a18' }}
+              className="flex-1 py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-opacity active:opacity-80 disabled:opacity-40"
+              style={{ backgroundColor: '#0ac010', color: '#1a3a18' }}
             >
               <LogIn size={18} strokeWidth={2.5} />
               Enter
             </button>
+
             <button
               onClick={() => handleGate('exit')}
               disabled={exitCooldown}
-              className="w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-opacity active:opacity-80 disabled:opacity-40"
+              className="flex-1 py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-opacity active:opacity-80 disabled:opacity-40"
               style={{ backgroundColor: '#F5C200', color: '#1a3a18' }}
             >
               <LogOut size={18} strokeWidth={2.5} />
@@ -268,8 +315,9 @@ export default function DashboardPage() {
             <Tile
               key={tile.id}
               data={tile}
+              badge={badges[tile.id] ?? 0}
               disabled={isRenter && !!tile.ownerOnly}
-              onClick={() => navigate(tile.path)}
+              onClick={() => handleTileClick(tile)}
             />
           ))}
         </div>
@@ -278,8 +326,9 @@ export default function DashboardPage() {
             <Tile
               key={tile.id}
               data={tile}
+              badge={badges[tile.id] ?? 0}
               disabled={isRenter && !!tile.ownerOnly}
-              onClick={() => navigate(tile.path)}
+              onClick={() => handleTileClick(tile)}
             />
           ))}
           <LogoTile />
@@ -296,43 +345,6 @@ export default function DashboardPage() {
         <MessageCircle size={22} color="white" />
       </button>
 
-      {/* Gate toast */}
-      {toast && (
-        <div
-          className="fixed left-4 right-4 max-w-sm mx-auto z-50 transition-all duration-300 ease-out"
-          style={{
-            bottom: 'calc(5rem + env(safe-area-inset-bottom))',
-            transform: toastVisible ? 'translateY(0)' : 'translateY(160%)',
-            opacity: toastVisible ? 1 : 0,
-          }}
-        >
-          <div
-            className="rounded-2xl px-5 py-4 shadow-2xl flex items-center gap-4"
-            style={{
-              backgroundColor: toast.ok
-                ? toast.action === 'enter' ? PRIMARY : AMBER
-                : '#c03828',
-            }}
-          >
-            {toast.ok
-              ? <CheckCircle size={26} color="white" strokeWidth={2} className="flex-shrink-0" />
-              : <AlertCircle size={26} color="white" strokeWidth={2} className="flex-shrink-0" />
-            }
-            <div>
-              <p className="text-white font-bold text-sm leading-snug">
-                {toast.ok
-                  ? toast.action === 'enter' ? 'Enter gate opened!' : 'Exit gate opened!'
-                  : 'Could not reach the gate'}
-              </p>
-              <p className="text-white/75 text-xs mt-0.5">
-                {toast.ok
-                  ? 'Please proceed through the gate.'
-                  : 'Check your connection and try again.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       <ProfileSheet
         open={profileOpen}

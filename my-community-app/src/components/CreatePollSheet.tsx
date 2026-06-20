@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { X, Plus, Trash2, Calendar } from 'lucide-react'
 
 const PRIMARY = '#243d20'
@@ -61,8 +61,8 @@ export default function CreatePollSheet({ open, onClose, onSave }: Props) {
         onClick={handleClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
-        style={{ maxHeight: '85vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 sheet-safe-bottom"
+        style={{ maxHeight: 'calc(85vh - var(--keyboard-h, 0px))', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="flex justify-center pt-3 flex-shrink-0">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -92,13 +92,13 @@ export default function CreatePollSheet({ open, onClose, onSave }: Props) {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the proposal or question in detail…"
+              placeholder="Describe the proposal or question in detailâ€¦"
               rows={4}
               className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700 focus:ring-1 focus:ring-green-700 resize-none"
             />
           </div>
 
-          {/* End date — styled button with transparent native input on top */}
+          {/* End date â€” styled button with transparent native input on top */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">Voting closes on *</label>
             <div className="relative">
@@ -109,11 +109,11 @@ export default function CreatePollSheet({ open, onClose, onSave }: Props) {
                 <span className={endsAt ? 'text-gray-900' : 'text-gray-400'}>
                   {endsAt
                     ? new Date(endsAt + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-                    : 'Tap to choose a date…'}
+                    : 'Tap to choose a dateâ€¦'}
                 </span>
                 <Calendar size={16} color={endsAt ? '#15803d' : '#9ca3af'} />
               </div>
-              {/* Transparent native input floated over the button — opens native calendar on tap */}
+              {/* Transparent native input floated over the button â€” opens native calendar on tap */}
               <input
                 type="date"
                 value={endsAt}
@@ -199,3 +199,4 @@ export default function CreatePollSheet({ open, onClose, onSave }: Props) {
     </>
   )
 }
+

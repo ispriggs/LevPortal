@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 :root {
   color-scheme: light;
@@ -6,26 +6,41 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100%;
   background-color: #ffffff;
-  /* Prevent text size changes on orientation change */
   -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
 }
 
 #root {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
-/* Safe area helpers for iPhone notch and home bar */
-.safe-top    { padding-top: env(safe-area-inset-top); }
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+/* ── Safe area helpers ───────────────────────────────────────────────────────
+   Use these on the outermost page shells only.
+   Interactive content should live inside <PageContainer> instead.        */
+.safe-top    { padding-top:    max(16px, env(safe-area-inset-top)); }
+.safe-bottom { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 
-/* Ensure inputs always show text */
+/* Sheet-specific: larger minimum so content clears the home indicator.
+   Also lifts the sheet above the software keyboard via --keyboard-h var
+   (set dynamically by KeyboardObserver in App.tsx).                      */
+.sheet-safe-bottom {
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  bottom: var(--keyboard-h, 0px) !important;
+}
+
+/* Ensure inputs always show text on light backgrounds */
 input, textarea, select { color: #111827; }
 
 /* Hide scrollbar but keep scrollable */
 .scrollbar-none { scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
-

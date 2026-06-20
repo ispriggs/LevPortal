@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { X, AlertTriangle, Wrench, Flag, Lightbulb, Paperclip } from 'lucide-react'
 import {
   type TicketCategory, type TicketPriority, type SubmitTicketData,
@@ -64,8 +64,8 @@ export default function SubmitTicketSheet({ open, defaultName, onClose, onSubmit
         onClick={handleClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
-        style={{ maxHeight: '85vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 sheet-safe-bottom"
+        style={{ maxHeight: 'calc(85vh - var(--keyboard-h, 0px))', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="flex justify-center pt-3 flex-shrink-0">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -123,7 +123,7 @@ export default function SubmitTicketSheet({ open, defaultName, onClose, onSubmit
           {/* Description */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Description *</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the issue in detail…" rows={4} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none" />
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the issue in detailâ€¦" rows={4} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none" />
           </div>
 
           {/* Priority */}
@@ -179,3 +179,4 @@ export default function SubmitTicketSheet({ open, defaultName, onClose, onSubmit
     </>
   )
 }
+

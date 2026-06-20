@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import levLogo from '@/assets/Stylized_Leaf_Logo_Design_Fotor-removebg-preview.png'
@@ -27,89 +27,87 @@ export default function SignInPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-5 py-12"
-      style={{ background: BG }}
-    >
-      {/* Small logo + name */}
-      <div className="flex flex-col items-center mb-8">
-        <img
-          src={levLogo}
-          alt="LEV"
-          className="h-12 w-auto mb-1"
-          style={{ filter: 'brightness(0) invert(1)' }}
-        />
-        <span className="text-white text-sm font-semibold tracking-wide">LEV Portal</span>
-      </div>
-
-      {/* Heading */}
-      <div className="text-center mb-6">
-        <h1 className="text-white text-3xl font-bold">Welcome back</h1>
-        <p className="text-white/60 text-sm mt-1">Sign in to your account</p>
-      </div>
-
-      {/* Card with form */}
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-2xl p-5 space-y-4"
-        style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)' }}
+    <div style={{ position: 'fixed', inset: 0, background: BG, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+      <div
+        className="flex flex-col items-center justify-center flex-1 w-full max-w-sm mx-auto"
+        style={{
+          paddingLeft:   'max(20px, env(safe-area-inset-left))',
+          paddingRight:  'max(20px, env(safe-area-inset-right))',
+          paddingTop:    'max(40px, env(safe-area-inset-top))',
+          paddingBottom: 'max(40px, env(safe-area-inset-bottom))',
+        }}
       >
-        <div className="space-y-1">
-          <label className="block text-white/70 text-xs font-medium pl-1">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-            placeholder="you@example.com"
-            className="w-full rounded-xl px-4 py-3 text-base text-white placeholder:text-white/40 outline-none"
-            style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)' }}
-          />
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <img src={levLogo} alt="LEV" className="h-12 w-auto mb-1" style={{ filter: 'brightness(0) invert(1)' }} />
+          <span className="text-white text-sm font-semibold tracking-wide">LEV Portal</span>
         </div>
 
-        <div className="space-y-1">
-          <label className="block text-white/70 text-xs font-medium pl-1">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-            placeholder="Your password"
-            className="w-full rounded-xl px-4 py-3 text-base text-white placeholder:text-white/40 outline-none"
-            style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)' }}
-          />
+        {/* Heading */}
+        <div className="text-center mb-6">
+          <h1 className="text-white text-3xl font-bold">Welcome back</h1>
+          <p className="text-white/60 text-sm mt-1">Sign in to your account</p>
         </div>
 
-        {error && <p className="text-red-300 text-sm text-center">{error}</p>}
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="w-full rounded-2xl p-5 space-y-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          <div className="space-y-1">
+            <label className="block text-white/70 text-xs font-medium pl-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              placeholder="you@example.com"
+              className="w-full rounded-xl px-4 py-3 text-base placeholder:text-white/40 outline-none"
+              style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-4 rounded-xl font-bold text-base transition-opacity disabled:opacity-60"
-          style={{ backgroundColor: YELLOW, color: '#182f15' }}
-        >
-          {loading ? 'Signing inâ€¦' : 'Sign In'}
-        </button>
-      </form>
+          <div className="space-y-1">
+            <label className="block text-white/70 text-xs font-medium pl-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              placeholder="Your password"
+              className="w-full rounded-xl px-4 py-3 text-base placeholder:text-white/40 outline-none"
+              style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+            />
+          </div>
 
-      {/* Footer links */}
-      <div className="mt-6 flex flex-col items-center gap-3">
-        <button
-          onClick={() => navigate('/login')}
-          className="text-white/50 text-sm hover:text-white/70 transition-colors"
-        >
-          â† Back
-        </button>
-        <Link
-          to="/forgot-password"
-          className="text-white/40 text-xs hover:text-white/60 transition-colors"
-        >
-          Forgot password?
-        </Link>
+          {error && <p className="text-red-300 text-sm text-center">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 rounded-xl font-bold text-base transition-opacity disabled:opacity-60"
+            style={{ backgroundColor: YELLOW, color: '#182f15' }}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <button
+            onClick={() => navigate('/login')}
+            className="text-white/50 text-sm"
+          >
+            Back
+          </button>
+          <Link to="/forgot-password" className="text-white/40 text-xs">
+            Forgot password?
+          </Link>
+        </div>
       </div>
     </div>
   )
 }
-

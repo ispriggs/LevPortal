@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Plus, Search, ChevronRight, Send, Flag,
-  Circle, Clock, CheckCircle, XCircle,
+  Circle, Clock, CheckCircle, XCircle, Trash2,
 } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
 import {
@@ -11,6 +11,7 @@ import {
   type TicketStatus, type SubmitTicketData,
 } from '@/store/ticketsStore'
 import SubmitTicketSheet, { CATEGORY_CONFIG, PRIORITY_CONFIG } from '@/components/SubmitTicketSheet'
+import { useToastStore } from '@/store/toastStore'
 
 const PRIMARY = '#243d20'
 
@@ -23,7 +24,7 @@ export const STATUS_CONFIG: Record<TicketStatus, {
   closed: { label: 'Closed', color: '#6b7280', bg: '#f3f4f6', icon: XCircle },
 }
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Helpers â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -34,27 +35,8 @@ function fmtDateTime(iso: string) {
   })
 }
 
-function useToast() {
-  const [state, setState] = useState({ msg: '', visible: false })
-  function show(msg: string) {
-    setState({ msg, visible: true })
-    setTimeout(() => setState((s) => ({ ...s, visible: false })), 3500)
-  }
-  return { ...state, show }
-}
 
-function Toast({ msg, visible }: { msg: string; visible: boolean }) {
-  return (
-    <div
-      className="fixed bottom-28 left-1/2 z-[200] px-5 py-3 bg-gray-900 text-white text-sm font-semibold rounded-full shadow-xl pointer-events-none transition-all duration-300 flex items-center gap-2"
-      style={{ transform: `translateX(-50%) translateY(${visible ? 0 : 12}px)`, opacity: visible ? 1 : 0 }}
-    >
-      <CheckCircle size={15} /> {msg}
-    </div>
-  )
-}
-
-// â”€â”€ Shared badge components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Shared badge components â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 function CategoryBadge({ category }: { category: TicketCategory }) {
   const cfg = CATEGORY_CONFIG[category]
@@ -84,17 +66,18 @@ function StatusBadge({ status }: { status: TicketStatus }) {
   )
 }
 
-// â”€â”€ Submit Ticket Sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Submit Ticket Sheet â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
-// â”€â”€ Ticket Detail View (full-screen overlay) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Ticket Detail View (full-screen overlay) â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 function TicketDetailView({
-  ticket, currentUser, onBack, onComment,
+  ticket, currentUser, onBack, onComment, onDelete,
 }: {
   ticket: Ticket
   currentUser: string
   onBack: () => void
   onComment: (text: string) => void
+  onDelete: () => void
 }) {
   const [text, setText] = useState('')
 
@@ -115,6 +98,11 @@ function TicketDetailView({
           <p className="text-sm font-bold text-gray-900 truncate">{ticket.subject}</p>
         </div>
         <StatusBadge status={ticket.status} />
+        {ticket.submittedBy === currentUser && (
+          <button onClick={onDelete} className="p-1.5 ml-1 text-red-400 active:opacity-70" aria-label="Delete ticket">
+            <Trash2 size={18} />
+          </button>
+        )}
       </div>
 
       {/* Ticket summary */}
@@ -208,7 +196,7 @@ function TicketDetailView({
   )
 }
 
-// â”€â”€ Ticket Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Ticket Card â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 function TicketCard({ ticket, onClick }: { ticket: Ticket; onClick: () => void }) {
   const commentCount = ticket.history.filter((h) => h.type === 'comment').length
@@ -243,7 +231,7 @@ function TicketCard({ ticket, onClick }: { ticket: Ticket; onClick: () => void }
   )
 }
 
-// â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Page â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 const STATUSES = ['open', 'in_progress', 'resolved', 'closed'] as const
 
@@ -251,7 +239,7 @@ export default function NeighbourSupportPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const displayName = getDisplayName(user)
-  const { tickets: allTickets, submitTicket, addComment, fetchTickets } = useTicketsStore()
+  const { tickets: allTickets, submitTicket, addComment, fetchTickets, deleteTicket } = useTicketsStore()
 
   useEffect(() => { fetchTickets() }, [])
 
@@ -261,7 +249,7 @@ export default function NeighbourSupportPage() {
   const [catFilter, setCatFilter] = useState('')
   const [priFilter, setPriFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const { msg: toastMsg, visible: toastVisible, show: showToast } = useToast()
+  const showToast = useToastStore((s) => s.showToast)
 
   // User only sees their own tickets
   const myTickets = allTickets.filter((t) => t.submittedBy === displayName)
@@ -304,6 +292,7 @@ export default function NeighbourSupportPage() {
           currentUser={displayName}
           onBack={() => setSelectedId(null)}
           onComment={(text) => addComment(selectedTicket.id, displayName, text, false)}
+          onDelete={() => { deleteTicket(selectedTicket.id); setSelectedId(null); showToast('Ticket deleted.') }}
         />
       )}
 
@@ -419,7 +408,6 @@ export default function NeighbourSupportPage() {
         onSubmit={handleSubmit}
       />
 
-      <Toast msg={toastMsg} visible={toastVisible} />
     </>
   )
 }

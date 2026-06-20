@@ -1,11 +1,12 @@
 ﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, MessageCircle, ChevronDown, ChevronUp, Clock, XCircle, FileEdit, CheckCircle, ClipboardList } from 'lucide-react'
+import { ArrowLeft, Plus, MessageCircle, ChevronDown, ChevronUp, Clock, XCircle, FileEdit, CheckCircle, ClipboardList, Trash2 } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import CreateProposalSheet from '@/components/CreateProposalSheet'
 import ProposalCommentsSheet from '@/components/ProposalCommentsSheet'
 import type { ProposalFormData } from '@/components/CreateProposalSheet'
+import { useToastStore } from '@/store/toastStore'
 
 const PRIMARY = '#243d20'
 
@@ -54,7 +55,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
-// â”€â”€ Proposal card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Proposal card â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 function ProposalCard({
   proposal,
@@ -62,12 +63,14 @@ function ProposalCard({
   onCommentOpen,
   onEdit,
   onSubmitDraft,
+  onDelete,
 }: {
   proposal: Proposal
   currentUserId: string
   onCommentOpen: (p: Proposal) => void
   onEdit: (p: Proposal) => void
   onSubmitDraft: (p: Proposal) => void
+  onDelete: (id: string) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const isOwner = proposal.authorId === currentUserId
@@ -165,7 +168,7 @@ function ProposalCard({
       <div className="border-t border-gray-100 mx-4" />
 
       {/* Action row */}
-      <div className="px-4 py-3 flex gap-2">
+      <div className="px-4 py-3 flex gap-2 items-center">
         {proposal.status === 'approved' && (
           <button
             onClick={() => onCommentOpen(proposal)}
@@ -197,18 +200,29 @@ function ProposalCard({
             </button>
           </>
         )}
+
+        {isOwner && (
+          <button
+            onClick={() => onDelete(proposal.id)}
+            className="p-2.5 rounded-xl border border-red-200 text-red-500 active:opacity-70 flex-shrink-0"
+            aria-label="Delete proposal"
+          >
+            <Trash2 size={15} />
+          </button>
+        )}
       </div>
     </div>
   )
 }
 
-// â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Page â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 export default function ProposalsPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const displayName = getDisplayName(user)
   const userId = user?.id ?? ''
+  const showToast = useToastStore((s) => s.showToast)
 
   const [proposals, setProposals] = useState<Proposal[]>([])
   const [createOpen, setCreateOpen] = useState(false)
@@ -300,6 +314,7 @@ export default function ProposalsPage() {
     if (editingProposal) {
       await supabase.from('proposals').update(payload).eq('id', editingProposal.id)
       setEditingProposal(null)
+      showToast(status === 'draft' ? 'Draft saved.' : 'Proposal submitted for review!')
       await load()
     } else {
       const { data: row } = await supabase
@@ -329,6 +344,7 @@ export default function ProposalsPage() {
         comments: [],
       }
       setProposals((prev) => [newP, ...prev])
+      showToast(status === 'draft' ? 'Draft saved.' : 'Proposal submitted for review!')
     }
   }
 
@@ -337,6 +353,7 @@ export default function ProposalsPage() {
     setProposals((prev) =>
       prev.map((p) => p.id !== proposal.id ? p : { ...p, status: 'pending' })
     )
+    showToast('Proposal submitted for review!')
   }
 
   async function handleAddComment(proposalId: string, text: string) {
@@ -367,6 +384,16 @@ export default function ProposalsPage() {
         ? { ...prev, comments: prev.comments.filter((c) => c.id !== commentId) }
         : prev
     )
+  }
+
+  async function handleDeleteProposal(proposalId: string) {
+    const proposal = proposals.find((p) => p.id === proposalId)
+    if (proposal?.photoPath) {
+      await supabase.storage.from('proposal-images').remove([proposal.photoPath])
+    }
+    await supabase.from('proposals').delete().eq('id', proposalId)
+    setProposals((prev) => prev.filter((p) => p.id !== proposalId))
+    showToast('Proposal deleted.')
   }
 
   function handleEdit(proposal: Proposal) {
@@ -440,6 +467,7 @@ export default function ProposalsPage() {
                 onCommentOpen={setCommentProposal}
                 onEdit={handleEdit}
                 onSubmitDraft={handleSubmitDraft}
+                onDelete={handleDeleteProposal}
               />
             ))}
           </div>
