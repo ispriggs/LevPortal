@@ -59,14 +59,12 @@ function formatDate(iso: string) {
 function ProposalCard({
   proposal,
   currentUserId,
-  currentUser,
   onCommentOpen,
   onEdit,
   onSubmitDraft,
 }: {
   proposal: Proposal
   currentUserId: string
-  currentUser: string
   onCommentOpen: (p: Proposal) => void
   onEdit: (p: Proposal) => void
   onSubmitDraft: (p: Proposal) => void
@@ -415,7 +413,6 @@ export default function ProposalsPage() {
                 key={p.id}
                 proposal={p}
                 currentUserId={userId}
-                currentUser={displayName}
                 onCommentOpen={setCommentProposal}
                 onEdit={handleEdit}
                 onSubmitDraft={handleSubmitDraft}

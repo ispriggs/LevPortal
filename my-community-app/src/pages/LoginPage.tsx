@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { useAuthStore } from '@/store/authStore'
 
 const PRIMARY = '#243d20'
 
@@ -11,7 +10,6 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const mockLogin = useAuthStore((s) => s.mockLogin)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
