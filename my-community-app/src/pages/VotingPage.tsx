@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase'
 const PRIMARY = '#243d20'
 
 export type PollOption = { id: string; text: string; votes: number }
-export type Comment    = { id: string; author: string; text: string; createdAt: string }
+export type Comment = { id: string; author: string; text: string; createdAt: string }
 export type Poll = {
   id: string
   title: string
@@ -233,8 +233,8 @@ export default function VotingPage() {
 
       if (!pollRows) return
 
-      const options  = optionRows  ?? []
-      const votes    = voteRows    ?? []
+      const options = optionRows ?? []
+      const votes = voteRows ?? []
       const comments = commentRows ?? []
 
       const uids = [...new Set([
@@ -257,21 +257,21 @@ export default function VotingPage() {
       })
 
       setPolls(pollRows.map((p) => ({
-        id:          p.id,
-        title:       p.title,
+        id: p.id,
+        title: p.title,
         description: p.description,
-        createdBy:   nameMap[p.created_by] ?? 'Unknown',
-        endsAt:      p.ends_at,
-        audience:    p.audience as PollAudience,
-        options:     options
+        createdBy: nameMap[p.created_by] ?? 'Unknown',
+        endsAt: p.ends_at,
+        audience: p.audience as PollAudience,
+        options: options
           .filter((o) => o.poll_id === p.id)
           .map((o) => ({ id: o.id, text: o.text, votes: voteCounts[o.id] ?? 0 })),
-        comments:    comments
+        comments: comments
           .filter((c) => c.poll_id === p.id)
           .map((c) => ({
-            id:        c.id,
-            author:    nameMap[c.author_id] ?? 'Unknown',
-            text:      c.text,
+            id: c.id,
+            author: nameMap[c.author_id] ?? 'Unknown',
+            text: c.text,
             createdAt: c.created_at,
           })),
       })))
@@ -285,9 +285,9 @@ export default function VotingPage() {
     if (!authUser) return
 
     await supabase.from('poll_votes').insert({
-      poll_id:   pollId,
+      poll_id: pollId,
       option_id: optionId,
-      user_id:   authUser.id,
+      user_id: authUser.id,
     })
 
     setMyVotes((prev) => ({ ...prev, [pollId]: optionId }))
@@ -310,11 +310,11 @@ export default function VotingPage() {
     const { data: poll } = await supabase
       .from('polls')
       .insert({
-        title:       data.title,
+        title: data.title,
         description: data.description,
-        created_by:  authUser.id,
-        ends_at:     data.endsAt,
-        audience:    data.audience,
+        created_by: authUser.id,
+        ends_at: data.endsAt,
+        audience: data.audience,
       })
       .select()
       .single()
@@ -322,7 +322,7 @@ export default function VotingPage() {
     if (!poll) return
 
     const optionInserts = data.options.map((text, i) => ({
-      poll_id:    poll.id,
+      poll_id: poll.id,
       text,
       sort_order: i,
     }))
@@ -332,14 +332,14 @@ export default function VotingPage() {
       .select()
 
     const newPoll: Poll = {
-      id:          poll.id,
-      title:       poll.title,
+      id: poll.id,
+      title: poll.title,
       description: poll.description,
-      createdBy:   displayName,
-      endsAt:      poll.ends_at,
-      audience:    poll.audience as PollAudience,
-      options:     (optionRows ?? []).map((o) => ({ id: o.id, text: o.text, votes: 0 })),
-      comments:    [],
+      createdBy: displayName,
+      endsAt: poll.ends_at,
+      audience: poll.audience as PollAudience,
+      options: (optionRows ?? []).map((o) => ({ id: o.id, text: o.text, votes: 0 })),
+      comments: [],
     }
     setPolls((prev) => [newPoll, ...prev])
   }
@@ -356,9 +356,9 @@ export default function VotingPage() {
 
     if (!row) return
     const comment: Comment = {
-      id:        row.id,
-      author:    displayName,
-      text:      row.text,
+      id: row.id,
+      author: displayName,
+      text: row.text,
       createdAt: row.created_at,
     }
     setPolls((prev) =>

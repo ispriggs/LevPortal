@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { X, Trash2, Send } from 'lucide-react'
-import type { NewsPost } from '@/pages/NewsPage'
+import type { Proposal, ProposalComment } from '@/pages/ProposalsPage'
 
 const PRIMARY = '#243d20'
 
 interface Props {
-  post: NewsPost | null
+  proposal: Proposal | null
   currentUser: string
   onClose: () => void
-  onAddComment: (postId: string, text: string) => void
-  onDeleteComment: (postId: string, commentId: string) => void
+  onAddComment: (proposalId: string, text: string) => void
+  onDeleteComment: (proposalId: string, commentId: string) => void
 }
 
 function timeAgo(iso: string) {
@@ -22,23 +22,19 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export default function NewsCommentsSheet({
-  post,
-  currentUser,
-  onClose,
-  onAddComment,
-  onDeleteComment,
+export default function ProposalCommentsSheet({
+  proposal, currentUser, onClose, onAddComment, onDeleteComment,
 }: Props) {
   const [text, setText] = useState('')
 
   function handleSend() {
-    if (!text.trim() || !post) return
-    onAddComment(post.id, text.trim())
+    if (!text.trim() || !proposal) return
+    onAddComment(proposal.id, text.trim())
     setText('')
   }
 
-  const open = !!post
-  const isCreator = post?.author === currentUser
+  const open = !!proposal
+  const isCreator = proposal?.author === currentUser
 
   return (
     <>
@@ -48,7 +44,7 @@ export default function NewsCommentsSheet({
         onClick={onClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300"
         style={{ maxHeight: '70vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="flex justify-center pt-3">
@@ -57,25 +53,24 @@ export default function NewsCommentsSheet({
 
         <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100 flex-shrink-0">
           <h2 className="text-base font-bold text-gray-900">
-            Comments {post && post.comments.length > 0 && `(${post.comments.length})`}
+            Comments {proposal && proposal.comments.length > 0 && `(${proposal.comments.length})`}
           </h2>
           <button onClick={onClose} className="p-1 text-gray-400"><X size={20} /></button>
         </div>
 
         {isCreator && (
           <p className="px-6 py-2 text-xs text-gray-400 bg-gray-50 flex-shrink-0">
-            You can remove any comment on your post.
+            You can remove any comment on your proposal.
           </p>
         )}
 
-        {/* Comment list */}
         <div className="flex-1 min-h-0 overflow-y-auto px-6 py-3 space-y-3">
-          {post && post.comments.length === 0 && (
+          {proposal && proposal.comments.length === 0 && (
             <p className="text-sm text-gray-400 text-center py-8">
               No comments yet. Be the first to comment!
             </p>
           )}
-          {post?.comments.map((c) => (
+          {proposal?.comments.map((c: ProposalComment) => (
             <div key={c.id} className="flex gap-3 group">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-white font-bold text-xs"
@@ -92,9 +87,8 @@ export default function NewsCommentsSheet({
               </div>
               {isCreator && (
                 <button
-                  onClick={() => post && onDeleteComment(post.id, c.id)}
+                  onClick={() => proposal && onDeleteComment(proposal.id, c.id)}
                   className="text-gray-300 p-1 self-start flex-shrink-0 opacity-0 group-hover:opacity-100 active:opacity-100"
-                  aria-label="Delete comment"
                 >
                   <Trash2 size={15} />
                 </button>
@@ -103,8 +97,10 @@ export default function NewsCommentsSheet({
           ))}
         </div>
 
-        {/* Input row */}
-        <div className="flex-shrink-0 px-4 pt-3 border-t border-gray-100 flex gap-2 items-end" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
+        <div
+          className="flex-shrink-0 px-4 pt-3 border-t border-gray-100 flex gap-2 items-end"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
+        >
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}

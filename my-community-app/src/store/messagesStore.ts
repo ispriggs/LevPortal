@@ -108,18 +108,16 @@ export const useMessagesStore = create<MessagesStore>()((set) => ({
 
     if (!thread) return
 
-    // Add both participants and first message in parallel
-    await Promise.all([
-      supabase.from('message_participants').insert([
-        { thread_id: thread.id, user_id: user.id },
-        { thread_id: thread.id, user_id: recipientProfile.id },
-      ]),
-      supabase.from('message_items').insert({
-        thread_id: thread.id,
-        from_id: user.id,
-        text,
-      }),
+    // Participants must exist before inserting the first message (RLS check)
+    await supabase.from('message_participants').insert([
+      { thread_id: thread.id, user_id: user.id },
+      { thread_id: thread.id, user_id: recipientProfile.id },
     ])
+    await supabase.from('message_items').insert({
+      thread_id: thread.id,
+      from_id: user.id,
+      text,
+    })
 
     const { data: senderProfile } = await supabase
       .from('profiles')

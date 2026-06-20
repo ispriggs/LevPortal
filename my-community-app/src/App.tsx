@@ -14,6 +14,7 @@ import MessagesPage from '@/pages/MessagesPage'
 import NeighbourSupportPage from '@/pages/NeighbourSupportPage'
 import GatePage from '@/pages/GatePage'
 import PassSharePage from '@/pages/PassSharePage'
+import ProposalsPage from '@/pages/ProposalsPage'
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/neighbours-support" element={<NeighbourSupportPage />} />
         <Route path="/gate" element={<GatePage />} />
+        <Route path="/proposals" element={<ProposalsPage />} />
       </Route>
 
       {/* Public — no auth required (visitors open this link) */}

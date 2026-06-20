@@ -80,7 +80,7 @@ function ThreadView({
       </div>
 
       {/* Reply input */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 flex gap-2 items-end safe-bottom">
+      <div className="flex-shrink-0 px-4 pt-3 border-t border-gray-100 flex gap-2 items-end" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}

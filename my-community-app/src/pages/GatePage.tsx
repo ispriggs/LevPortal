@@ -26,8 +26,12 @@ type PassDisplayStatus = 'active' | 'upcoming' | 'expired' | 'pending_approval' 
 
 function passStatus(pass: GatePass): PassDisplayStatus {
   if (pass.extended) {
-    if (!pass.approvalStatus || pass.approvalStatus === 'pending') return 'pending_approval'
     if (pass.approvalStatus === 'declined') return 'declined'
+    if (!pass.approvalStatus || pass.approvalStatus === 'pending') {
+      const hoursSince = (Date.now() - new Date(pass.createdAt).getTime()) / 3_600_000
+      if (hoursSince >= 48) return 'expired'
+      // Within 48h window: treat as usable, fall through to date check
+    }
   }
   const today = new Date().toISOString().slice(0, 10)
   if (today > pass.departureDate) return 'expired'
@@ -36,17 +40,36 @@ function passStatus(pass: GatePass): PassDisplayStatus {
 }
 
 function buildShareUrl(pass: GatePass): string {
-  return `${window.location.origin}/pass?v=${btoa(JSON.stringify(pass))}`
+  // Only include fields PassSharePage actually uses — exclude id, email, idPhotoUrl
+  const payload = {
+    passCode:       pass.passCode,
+    type:           pass.type,
+    reason:         pass.reason,
+    visitorName:    pass.visitorName,
+    phone:          pass.phone,
+    visitingLot:    pass.visitingLot,
+    extended:       pass.extended,
+    arrivalDate:    pass.arrivalDate,
+    departureDate:  pass.departureDate,
+    createdBy:      pass.createdBy,
+    createdAt:      pass.createdAt,
+    approvalStatus: pass.approvalStatus,
+  }
+  return `${window.location.origin}/pass?v=${btoa(JSON.stringify(payload))}`
 }
 
 function shareWhatsApp(pass: GatePass) {
   const url = buildShareUrl(pass)
+  const valid = pass.extended
+    ? `${fmtDate(pass.arrivalDate)} – ${fmtDate(pass.departureDate)}`
+    : fmtDate(pass.arrivalDate)
   const text =
-    `Your gate pass for Pura Maracay is ready!\n\n` +
-    `Visitor: ${pass.visitorName}\n` +
-    `Valid: ${fmtDate(pass.arrivalDate)}` +
-    (pass.extended ? ` – ${fmtDate(pass.departureDate)}` : '') +
-    `\n\nTap to open your pass and use the Enter button at the gate:\n${url}`
+    `Welcome to LEV! 🌿\n\n` +
+    `Here is your gate pass for Pura Maracay:\n\n` +
+    `👤 ${pass.visitorName}\n` +
+    `📅 ${valid}\n` +
+    `🏠 Lot ${pass.visitingLot}\n\n` +
+    `Tap the link below to open your pass at the gate:\n${url}`
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
 }
 
@@ -57,6 +80,10 @@ function shareWhatsApp(pass: GatePass) {
 function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
   const cfg    = PASS_TYPE_CONFIG[pass.type]
   const status = passStatus(pass)
+  const isPending = pass.extended && pass.approvalStatus === 'pending'
+  const hoursLeft = isPending
+    ? Math.ceil(Math.max(0, 48 - (Date.now() - new Date(pass.createdAt).getTime()) / 3_600_000))
+    : 0
 
   const STATUS_STYLES: Record<PassDisplayStatus, { bg: string; color: string; label: string }> = {
     active:           { bg: '#d1fae5', color: '#065f46', label: 'Active' },
@@ -65,8 +92,10 @@ function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
     pending_approval: { bg: '#fef3c7', color: '#92400e', label: 'Pending Approval' },
     declined:         { bg: '#fee2e2', color: '#991b1b', label: 'Declined' },
   }
-  const statusStyle = STATUS_STYLES[status]
-  const canShare = status !== 'pending_approval' && status !== 'declined'
+  const statusStyle = isPending
+    ? STATUS_STYLES.pending_approval
+    : STATUS_STYLES[status]
+  const canShare = status !== 'declined' && status !== 'expired'
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex">
@@ -96,9 +125,9 @@ function PassCard({ pass, onView }: { pass: GatePass; onView: () => void }) {
             ? `${fmtDate(pass.arrivalDate)} – ${fmtDate(pass.departureDate)}`
             : fmtDate(pass.arrivalDate)}
         </p>
-        {status === 'pending_approval' && (
+        {isPending && (
           <p className="text-xs font-medium text-amber-600 mb-3">
-            Awaiting admin approval — share link will be available once approved.
+            Pending approval · visitor can use gate for {hoursLeft}h · auto-expires if not approved.
           </p>
         )}
         <div className="flex gap-2">

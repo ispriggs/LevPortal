@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Check, X, Send, MessageSquare,
   FileText, UserPlus, ClipboardList, Ticket as TicketIcon,
-  ChevronDown, ChevronUp, AlertCircle, Eye, ExternalLink, QrCode,
+  AlertCircle, Eye, ExternalLink, QrCode,
 } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
@@ -11,22 +11,21 @@ import { useMessagesStore } from '@/store/messagesStore'
 import {
   useTicketsStore, type Ticket, type TicketStatus, type TicketPriority,
 } from '@/store/ticketsStore'
-import { CATEGORY_CONFIG, PRIORITY_CONFIG, STATUS_CONFIG } from '@/pages/NeighbourSupportPage'
+import { CATEGORY_CONFIG, PRIORITY_CONFIG } from '@/components/SubmitTicketSheet'
+import { STATUS_CONFIG } from '@/pages/NeighbourSupportPage'
 import {
   useGateStore, type GatePass,
   PASS_TYPE_CONFIG, PASS_REASON_LABELS,
 } from '@/store/gateStore'
+import type { ProposalComment } from '@/pages/ProposalsPage'
 
-const PRIMARY   = '#243d20'
-const RED       = '#c03828'
-const BLUE      = '#2565a8'
-const PURPLE    = '#6838b8'
+const PRIMARY = '#243d20'
+const RED = '#c03828'
 
 // ── Types ────────────────────────────────────────────────────────────────
 
-type DocStatus      = 'pending' | 'approved' | 'declined'
-type SignupStatus   = 'pending' | 'approved' | 'declined'
-type ProposalStatus = 'pending' | 'in_review' | 'assigned' | 'completed' | 'declined'
+type DocStatus = 'pending' | 'approved' | 'declined'
+type SignupStatus = 'pending' | 'approved' | 'declined'
 
 type PendingDoc = {
   id: string; title: string; folder: string; uploadedBy: string
@@ -38,9 +37,10 @@ type PendingSignup = {
   lot?: string; submittedAt: string; status: SignupStatus
 }
 type AdminProposal = {
-  id: string; title: string; description: string
-  submittedBy: string; submittedAt: string
-  status: ProposalStatus; assignedTo?: string
+  id: string; category: string; title: string; description: string
+  photoUrl?: string; submittedBy: string; submittedAt: string
+  status: 'pending' | 'approved' | 'rejected'
+  comments: ProposalComment[]
 }
 
 
@@ -53,16 +53,16 @@ function fmt(iso: string) {
 
 function StatusBadge({ status }: { status: string }) {
   const MAP: Record<string, { bg: string; color: string; label: string }> = {
-    pending:     { bg: '#fef3c7', color: '#92400e', label: 'Pending' },
-    approved:    { bg: '#d1fae5', color: '#065f46', label: 'Approved' },
-    declined:    { bg: '#fee2e2', color: '#991b1b', label: 'Declined' },
-    in_review:   { bg: '#dbeafe', color: '#1e40af', label: 'In Review' },
-    assigned:    { bg: '#ede9fe', color: '#5b21b6', label: 'Assigned' },
-    completed:   { bg: '#d1fae5', color: '#065f46', label: 'Completed' },
-    open:        { bg: '#ffedd5', color: '#9a3412', label: 'Open' },
+    pending: { bg: '#fef3c7', color: '#92400e', label: 'Pending' },
+    approved: { bg: '#d1fae5', color: '#065f46', label: 'Approved' },
+    declined: { bg: '#fee2e2', color: '#991b1b', label: 'Declined' },
+    in_review: { bg: '#dbeafe', color: '#1e40af', label: 'In Review' },
+    assigned: { bg: '#ede9fe', color: '#5b21b6', label: 'Assigned' },
+    completed: { bg: '#d1fae5', color: '#065f46', label: 'Completed' },
+    open: { bg: '#ffedd5', color: '#9a3412', label: 'Open' },
     in_progress: { bg: '#dbeafe', color: '#1e40af', label: 'In Progress' },
-    resolved:    { bg: '#d1fae5', color: '#065f46', label: 'Resolved' },
-    closed:      { bg: '#f3f4f6', color: '#6b7280', label: 'Closed' },
+    resolved: { bg: '#d1fae5', color: '#065f46', label: 'Resolved' },
+    closed: { bg: '#f3f4f6', color: '#6b7280', label: 'Closed' },
   }
   const s = MAP[status] ?? { bg: '#f3f4f6', color: '#6b7280', label: status }
   return (
@@ -92,7 +92,7 @@ function MessageSheet({
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-40" style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity .3s' }} onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl safe-bottom" style={{ transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl safe-bottom" style={{ maxHeight: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-gray-300 rounded-full" /></div>
         <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100">
           <h2 className="text-base font-bold text-gray-900">Send Message</h2>
@@ -129,7 +129,7 @@ function SignupDeclineSheet({
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-40" style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity .3s' }} onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl safe-bottom" style={{ transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl safe-bottom" style={{ maxHeight: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-gray-300 rounded-full" /></div>
         <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100">
           <h2 className="text-base font-bold text-gray-900">Decline Signup</h2>
@@ -161,75 +161,6 @@ function SignupDeclineSheet({
   )
 }
 
-// ── Proposal Status Sheet ─────────────────────────────────────────────────
-
-function ProposalStatusSheet({
-  open, proposal, onClose, onUpdate,
-}: {
-  open: boolean; proposal: AdminProposal | null; onClose: () => void
-  onUpdate: (id: string, status: ProposalStatus, assignedTo?: string) => void
-}) {
-  const [status, setStatus] = useState<ProposalStatus>('in_review')
-  const [assignedTo, setAssignedTo] = useState('')
-
-  function handleUpdate() {
-    if (!proposal) return
-    onUpdate(proposal.id, status, status === 'assigned' ? assignedTo : undefined)
-    onClose()
-  }
-
-  const OPTIONS: { value: ProposalStatus; label: string; color: string }[] = [
-    { value: 'in_review', label: 'In Review',          color: BLUE },
-    { value: 'assigned',  label: 'Assigned to Board',  color: PURPLE },
-    { value: 'completed', label: 'Completed',           color: '#065f46' },
-  ]
-
-  return (
-    <>
-      <div className="fixed inset-0 bg-black/50 z-40" style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity .3s' }} onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl safe-bottom" style={{ transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
-        <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-gray-300 rounded-full" /></div>
-        <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-900">Update Status</h2>
-          <button onClick={onClose} className="p-1 text-gray-400"><X size={20} /></button>
-        </div>
-        <div className="px-6 py-4 space-y-3">
-          {proposal && <p className="text-sm font-semibold text-gray-900">{proposal.title}</p>}
-          <div className="space-y-2">
-            {OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setStatus(opt.value)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-sm font-semibold transition-colors text-left"
-                style={{
-                  borderColor: status === opt.value ? opt.color : '#e5e7eb',
-                  backgroundColor: status === opt.value ? opt.color + '15' : 'white',
-                  color: status === opt.value ? opt.color : '#374151',
-                }}
-              >
-                <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0" style={{ borderColor: status === opt.value ? opt.color : '#d1d5db' }}>
-                  {status === opt.value && <div className="w-2 h-2 rounded-full" style={{ backgroundColor: opt.color }} />}
-                </div>
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          {status === 'assigned' && (
-            <input
-              type="text" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}
-              placeholder="Assigned to (e.g. Board Committee)"
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-base text-gray-900 outline-none focus:border-green-700"
-            />
-          )}
-          <button onClick={handleUpdate} className="w-full py-3.5 rounded-xl text-white font-semibold text-sm" style={{ backgroundColor: PRIMARY }}>
-            Update Status
-          </button>
-        </div>
-      </div>
-    </>
-  )
-}
-
 // ── Doc Preview Sheet ─────────────────────────────────────────────────────
 
 function DocPreviewSheet({
@@ -251,7 +182,7 @@ function DocPreviewSheet({
       />
       <div
         className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
-        style={{ height: '92vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        style={{ height: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 flex-shrink-0">
@@ -393,47 +324,28 @@ function SignupItem({ s, onApprove, onDecline }: { s: PendingSignup; onApprove: 
 }
 
 function ProposalItem({
-  p, onStatusOpen, onDecline, onMessage,
-}: { p: AdminProposal; onStatusOpen: () => void; onDecline: () => void; onMessage: () => void }) {
-  const [expanded, setExpanded] = useState(false)
-  const long = p.description.length > 120
+  p, onManage,
+}: { p: AdminProposal; onManage: () => void }) {
+  const commentCount = p.comments.length
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-2">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-bold text-gray-900 leading-snug flex-1">{p.title}</p>
-        <StatusBadge status={p.status} />
-      </div>
-      <p className="text-xs text-gray-500">
-        By <span className="font-medium text-gray-700">{p.submittedBy}</span> · {fmt(p.submittedAt)}
-        {p.assignedTo && <span className="text-purple-600"> · {p.assignedTo}</span>}
-      </p>
-      <p className="text-sm text-gray-600 leading-relaxed">
-        {long && !expanded ? p.description.slice(0, 120) + '…' : p.description}
-        {long && (
-          <button onClick={() => setExpanded(x => !x)} className="ml-1 text-xs font-semibold" style={{ color: PRIMARY }}>
-            {expanded ? <ChevronUp size={12} className="inline" /> : <ChevronDown size={12} className="inline" />}
-            {expanded ? ' less' : ' more'}
-          </button>
-        )}
-      </p>
-      {p.status !== 'completed' && p.status !== 'declined' && (
-        <div className="flex gap-2 pt-1">
-          <button onClick={onStatusOpen} className="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold" style={{ backgroundColor: PRIMARY }}>
-            Update Status
-          </button>
-          <button onClick={onDecline} className="flex-1 py-2.5 rounded-xl border border-red-300 text-red-600 text-sm font-semibold flex items-center justify-center gap-1">
-            <X size={13} /> Decline
-          </button>
-          <button onClick={onMessage} className="py-2.5 px-3 rounded-xl border border-gray-300 text-gray-600" title="Send message">
-            <MessageSquare size={15} />
-          </button>
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex">
+      <div className="w-1.5 flex-shrink-0" style={{ backgroundColor: p.status === 'pending' ? '#d97706' : p.status === 'approved' ? '#16a34a' : '#dc2626' }} />
+      <div className="flex-1 p-4 min-w-0">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{p.category}</p>
+            <p className="text-sm font-bold text-gray-900 leading-snug">{p.title}</p>
+          </div>
+          <StatusBadge status={p.status} />
         </div>
-      )}
-      {(p.status === 'completed' || p.status === 'declined') && (
-        <button onClick={onMessage} className="flex items-center gap-1.5 text-sm text-gray-500 pt-1">
-          <MessageSquare size={14} /> Send message to submitter
+        <p className="text-xs text-gray-500 mb-3">
+          {p.submittedBy} · {fmt(p.submittedAt)}
+          {commentCount > 0 && <span className="ml-2">{commentCount} comment{commentCount !== 1 ? 's' : ''}</span>}
+        </p>
+        <button onClick={onManage} className="w-full py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2" style={{ backgroundColor: PRIMARY }}>
+          <MessageSquare size={14} /> View &amp; Manage
         </button>
-      )}
+      </div>
     </div>
   )
 }
@@ -579,6 +491,117 @@ function TicketManageView({
   )
 }
 
+// ── Proposal Manage View ──────────────────────────────────────────────────
+
+function ProposalManageView({
+  proposal, allProposals, adminName, onBack, onApprove, onReject, onMessage, onAddComment,
+}: {
+  proposal: AdminProposal
+  allProposals: AdminProposal[]
+  adminName: string
+  onBack: () => void
+  onApprove: (id: string) => void
+  onReject: (id: string) => void
+  onMessage: () => void
+  onAddComment: (id: string, text: string) => void
+}) {
+  const [note, setNote] = useState('')
+  const live = allProposals.find((p) => p.id === proposal.id) ?? proposal
+
+  function handleSend() {
+    if (!note.trim()) return
+    onAddComment(live.id, note.trim())
+    setNote('')
+  }
+
+  return (
+    <div className="fixed inset-0 z-[35] bg-white flex flex-col safe-top">
+      <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
+        <button onClick={onBack} className="p-1 -ml-1"><ArrowLeft size={22} color="#111" /></button>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{live.category}</p>
+          <p className="text-sm font-bold text-gray-900 truncate">{live.title}</p>
+        </div>
+        <button onClick={onMessage} className="p-2 rounded-xl border border-gray-300 text-gray-600" title="Message submitter">
+          <MessageSquare size={16} />
+        </button>
+      </div>
+
+      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0 space-y-1.5">
+        <div className="flex flex-wrap gap-2">
+          <StatusBadge status={live.status} />
+        </div>
+        <p className="text-sm text-gray-700 leading-relaxed">{live.description}</p>
+        <p className="text-xs text-gray-400">By {live.submittedBy} · {fmt(live.submittedAt)}</p>
+        {live.status === 'pending' && (
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => { onApprove(live.id); onBack() }}
+              className="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-1.5"
+              style={{ backgroundColor: PRIMARY }}
+            >
+              <Check size={14} /> Approve
+            </button>
+            <button
+              onClick={() => { onReject(live.id); onBack() }}
+              className="flex-1 py-2.5 rounded-xl border border-red-300 text-red-600 text-sm font-semibold flex items-center justify-center gap-1"
+            >
+              <X size={13} /> Reject
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        {live.comments.length === 0 && (
+          <p className="text-xs text-gray-400 text-center py-6">No comments yet on this proposal.</p>
+        )}
+        {live.comments.map((c) => {
+          const isAdmin = c.author === adminName
+          return (
+            <div key={c.id} className={`flex ${isAdmin ? 'justify-start' : 'justify-end'}`}>
+              <div className="max-w-[80%]">
+                {isAdmin && <p className="text-xs text-gray-400 mb-1 ml-1">You (Admin)</p>}
+                <div
+                  className="px-4 py-2.5 rounded-2xl text-sm leading-relaxed"
+                  style={isAdmin
+                    ? { backgroundColor: PRIMARY, color: 'white', borderBottomLeftRadius: 4 }
+                    : { backgroundColor: '#f3f4f6', color: '#111827', borderBottomRightRadius: 4 }}
+                >
+                  {c.text}
+                </div>
+                <p className={`text-[10px] text-gray-400 mt-1 ${isAdmin ? 'ml-1' : 'text-right mr-1'}`}>
+                  {c.author} · {fmt(c.createdAt)}
+                </p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="flex-shrink-0 px-4 py-4 border-t border-gray-100 safe-bottom">
+        <div className="flex gap-2 items-end">
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Add a comment on this proposal…"
+            rows={2}
+            className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 outline-none focus:border-green-700 resize-none"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!note.trim()}
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 disabled:opacity-40"
+            style={{ backgroundColor: PRIMARY }}
+          >
+            <Send size={15} color="white" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Extended Pass Card ────────────────────────────────────────────────────────
 
 function ExtendedPassCard({
@@ -638,10 +661,10 @@ function ExtendedPassCard({
 type Tab = 'docs' | 'signups' | 'proposals' | 'tickets' | 'passes'
 
 export default function AdminPage() {
-  const navigate     = useNavigate()
-  const user         = useAuthStore((s) => s.user)
-  const adminName    = getDisplayName(user)
-  const startThread  = useMessagesStore((s) => s.startThread)
+  const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
+  const adminName = getDisplayName(user)
+  const startThread = useMessagesStore((s) => s.startThread)
 
   const { tickets: allTickets, updateStatus: storeUpdateStatus, addComment: storeAddComment, fetchTickets } = useTicketsStore()
   const { passes: allPasses, approvePass, declinePass, fetchPasses } = useGateStore()
@@ -651,16 +674,18 @@ export default function AdminPage() {
     fetchPasses()
   }, [])
   const [managingTicket, setManagingTicket] = useState<Ticket | null>(null)
+  const [managingProposal, setManagingProposal] = useState<AdminProposal | null>(null)
 
-  const [activeTab,   setActiveTab]   = useState<Tab>('docs')
-  const [docs,        setDocs]        = useState<PendingDoc[]>([])
-  const [signups,     setSignups]     = useState<PendingSignup[]>([])
-  const [proposals,   setProposals]   = useState<AdminProposal[]>([])
+  const [activeTab, setActiveTab] = useState<Tab>('docs')
+  const [docs, setDocs] = useState<PendingDoc[]>([])
+  const [signups, setSignups] = useState<PendingSignup[]>([])
+  const [proposals, setProposals] = useState<AdminProposal[]>([])
 
   const loadDocs = useCallback(async () => {
     const { data: rows } = await supabase
       .from('documents')
       .select('*')
+      .eq('status', 'pending')
       .order('uploaded_at', { ascending: false })
     if (!rows) return
 
@@ -671,15 +696,15 @@ export default function AdminPage() {
     const nameMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p.full_name]))
 
     setDocs(rows.map((r) => ({
-      id:         r.id,
-      title:      r.title,
-      folder:     r.folder,
+      id: r.id,
+      title: r.title,
+      folder: r.folder,
       uploadedBy: nameMap[r.uploaded_by] ?? 'Unknown',
       uploadedAt: r.uploaded_at,
-      access:     r.access as 'all' | 'owners_only',
-      status:     r.status as DocStatus,
-      fileUrl:    r.file_url,
-      filePath:   r.file_path,
+      access: r.access as 'all' | 'owners_only',
+      status: r.status as DocStatus,
+      fileUrl: r.file_url,
+      filePath: r.file_path,
     })))
   }, [])
 
@@ -690,13 +715,49 @@ export default function AdminPage() {
       .order('created_at', { ascending: false })
     if (!rows) return
     setSignups(rows.map((r) => ({
-      id:          r.id,
-      name:        r.full_name,
-      email:       r.phone ?? '',
-      role:        r.role as 'owner' | 'renter',
-      lot:         r.lot ?? undefined,
+      id: r.id,
+      name: r.full_name,
+      email: r.phone ?? '',
+      role: r.role as 'owner' | 'renter',
+      lot: r.lot ?? undefined,
       submittedAt: r.created_at,
-      status:      'approved' as SignupStatus,
+      status: 'approved' as SignupStatus,
+    })))
+  }, [])
+
+  const loadProposals = useCallback(async () => {
+    const { data: rows } = await supabase
+      .from('proposals')
+      .select('*')
+      .in('status', ['pending', 'approved', 'rejected'])
+      .order('created_at', { ascending: false })
+    if (!rows) return
+
+    const uids = [...new Set(rows.map((r) => r.created_by).filter(Boolean))]
+    const { data: profiles } = uids.length
+      ? await supabase.from('profiles').select('id, full_name').in('id', uids)
+      : { data: [] }
+    const nameMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p.full_name]))
+
+    const ids = rows.map((r) => r.id)
+    const { data: commentRows } = ids.length
+      ? await supabase.from('proposal_comments').select('*').in('proposal_id', ids).order('created_at', { ascending: true })
+      : { data: [] }
+    const commentsByProposal = (commentRows ?? []).reduce<Record<string, ProposalComment[]>>((acc, c) => {
+      const list = acc[c.proposal_id] ?? []
+      return { ...acc, [c.proposal_id]: [...list, { id: c.id, author: c.author, text: c.text, createdAt: c.created_at }] }
+    }, {})
+
+    setProposals(rows.map((r) => ({
+      id: r.id,
+      category: r.category,
+      title: r.title,
+      description: r.description,
+      photoUrl: r.photo_url ?? undefined,
+      submittedBy: nameMap[r.created_by] ?? 'Unknown',
+      submittedAt: r.created_at,
+      status: r.status as AdminProposal['status'],
+      comments: commentsByProposal[r.id] ?? [],
     })))
   }, [])
 
@@ -705,18 +766,18 @@ export default function AdminPage() {
     fetchPasses()
     loadDocs()
     loadSignups()
+    loadProposals()
   }, [])
 
   // Sheet state
-  const [msgSheet,       setMsgSheet]       = useState<{ to: string; subject: string } | null>(null)
-  const [declineSignup,  setDeclineSignup]  = useState<PendingSignup | null>(null)
-  const [statusProposal, setStatusProposal] = useState<AdminProposal | null>(null)
-  const [previewDoc,     setPreviewDoc]     = useState<PendingDoc | null>(null)
+  const [msgSheet, setMsgSheet] = useState<{ to: string; subject: string } | null>(null)
+  const [declineSignup, setDeclineSignup] = useState<PendingSignup | null>(null)
+  const [previewDoc, setPreviewDoc] = useState<PendingDoc | null>(null)
 
   // ── Doc actions
   async function approveDoc(id: string) {
     await supabase.from('documents').update({ status: 'approved' }).eq('id', id)
-    setDocs((p) => p.map((d) => d.id !== id ? d : { ...d, status: 'approved' }))
+    setDocs((p) => p.filter((d) => d.id !== id))
   }
   async function declineDoc(id: string) {
     const doc = docs.find((d) => d.id === id)!
@@ -740,16 +801,25 @@ export default function AdminPage() {
   }
 
   // ── Proposal actions
-  function declineProposal(id: string) {
+  async function approveProposal(id: string) {
+    await supabase.from('proposals').update({ status: 'approved' }).eq('id', id)
+    setProposals((prev) => prev.filter((x) => x.id !== id))
+  }
+  async function rejectProposal(id: string) {
     const p = proposals.find((x) => x.id === id)!
-    setProposals((prev) => prev.map((x) => x.id !== id ? x : { ...x, status: 'declined' }))
-    setMsgSheet({ to: p.submittedBy, subject: `Re: Proposal declined — ${p.title}` })
+    await supabase.from('proposals').update({ status: 'rejected' }).eq('id', id)
+    setProposals((prev) => prev.filter((x) => x.id !== id))
+    setMsgSheet({ to: p.submittedBy, subject: `Re: Proposal not approved — ${p.title}` })
   }
-  function updateProposalStatus(id: string, status: ProposalStatus, assignedTo?: string) {
-    setProposals((prev) => prev.map((p) => p.id !== id ? p : { ...p, status, assignedTo }))
-  }
-  function messageProposalSubmitter(p: AdminProposal) {
-    setMsgSheet({ to: p.submittedBy, subject: `Re: ${p.title}` })
+  async function addProposalComment(proposalId: string, text: string) {
+    const { data: row } = await supabase
+      .from('proposal_comments')
+      .insert({ proposal_id: proposalId, text, author: adminName })
+      .select()
+      .single()
+    if (!row) return
+    const comment: ProposalComment = { id: row.id, author: adminName, text: row.text, createdAt: row.created_at }
+    setProposals((prev) => prev.map((p) => p.id !== proposalId ? p : { ...p, comments: [...p.comments, comment] }))
   }
 
   // ── Send in-app message
@@ -758,18 +828,18 @@ export default function AdminPage() {
     startThread(msgSheet.subject, msgSheet.to, adminName, text)
   }
 
-  const pendingDocs      = docs.filter((d) => d.status === 'pending').length
-  const pendingSignups   = 0
+  const pendingDocs = docs.filter((d) => d.status === 'pending').length
+  const pendingSignups = 0
   const pendingProposals = proposals.filter((p) => p.status === 'pending').length
-  const openTickets      = allTickets.filter((t) => t.status === 'open').length
-  const pendingPasses    = allPasses.filter((p) => p.extended && p.approvalStatus === 'pending').length
+  const openTickets = allTickets.filter((t) => t.status === 'open').length
+  const pendingPasses = allPasses.filter((p) => p.extended && p.approvalStatus === 'pending').length
 
   const TABS: { id: Tab; label: string; icon: typeof FileText; count: number }[] = [
-    { id: 'docs',      label: 'Documents', icon: FileText,      count: pendingDocs },
-    { id: 'signups',   label: 'Signups',   icon: UserPlus,      count: pendingSignups },
+    { id: 'docs', label: 'Documents', icon: FileText, count: pendingDocs },
+    { id: 'signups', label: 'Signups', icon: UserPlus, count: pendingSignups },
     { id: 'proposals', label: 'Proposals', icon: ClipboardList, count: pendingProposals },
-    { id: 'tickets',   label: 'Tickets',   icon: TicketIcon,    count: openTickets },
-    { id: 'passes',    label: 'Passes',    icon: QrCode,        count: pendingPasses },
+    { id: 'tickets', label: 'Tickets', icon: TicketIcon, count: openTickets },
+    { id: 'passes', label: 'Passes', icon: QrCode, count: pendingPasses },
   ]
 
   return (
@@ -844,14 +914,12 @@ export default function AdminPage() {
 
         {activeTab === 'proposals' && (
           <>
-            {proposals.length === 0 && <p className="text-sm text-gray-400 text-center py-12">No proposals.</p>}
+            {proposals.length === 0 && <p className="text-sm text-gray-400 text-center py-12">No pending proposals.</p>}
             {proposals.map((p) => (
               <ProposalItem
                 key={p.id}
                 p={p}
-                onStatusOpen={() => setStatusProposal(p)}
-                onDecline={() => declineProposal(p.id)}
-                onMessage={() => messageProposalSubmitter(p)}
+                onManage={() => setManagingProposal(p)}
               />
             ))}
           </>
@@ -888,6 +956,20 @@ export default function AdminPage() {
         )}
       </div>
 
+      {/* Proposal manage view */}
+      {managingProposal && (
+        <ProposalManageView
+          proposal={managingProposal}
+          allProposals={proposals}
+          adminName={adminName}
+          onBack={() => setManagingProposal(null)}
+          onApprove={(id) => approveProposal(id)}
+          onReject={(id) => rejectProposal(id)}
+          onMessage={() => setMsgSheet({ to: managingProposal.submittedBy, subject: `Re: ${managingProposal.title}` })}
+          onAddComment={addProposalComment}
+        />
+      )}
+
       {/* Ticket manage view */}
       {managingTicket && (
         <TicketManageView
@@ -916,12 +998,6 @@ export default function AdminPage() {
         signup={declineSignup}
         onClose={() => setDeclineSignup(null)}
         onDecline={declineSignupFn}
-      />
-      <ProposalStatusSheet
-        open={!!statusProposal}
-        proposal={statusProposal}
-        onClose={() => setStatusProposal(null)}
-        onUpdate={updateProposalStatus}
       />
       <DocPreviewSheet
         doc={previewDoc}

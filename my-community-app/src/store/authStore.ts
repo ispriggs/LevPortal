@@ -8,7 +8,9 @@ type AuthStore = {
   session: Session | null
   initialized: boolean
   isAuthenticated: boolean
+  isAdmin: boolean
   setSession: (session: Session | null) => void
+  setIsAdmin: (v: boolean) => void
   mockLogin: (name: string, role: UserRole) => void
   logout: () => void
 }
@@ -18,16 +20,19 @@ export const useAuthStore = create<AuthStore>((set) => ({
   session: null,
   initialized: false,
   isAuthenticated: false,
+  isAdmin: false,
   setSession: (session) =>
     set({ session, user: session?.user ?? null, initialized: true, isAuthenticated: !!session }),
+  setIsAdmin: (v) => set({ isAdmin: v }),
   mockLogin: (name, role) =>
     set({
       initialized: true,
       isAuthenticated: true,
+      isAdmin: false,
       user: { user_metadata: { full_name: name, role } } as unknown as User,
       session: null,
     }),
-  logout: () => set({ user: null, session: null, isAuthenticated: false }),
+  logout: () => set({ user: null, session: null, isAuthenticated: false, isAdmin: false }),
 }))
 
 export function getDisplayName(user: User | null): string {

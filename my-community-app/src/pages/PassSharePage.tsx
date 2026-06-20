@@ -12,8 +12,14 @@ function fmtDate(d: string) {
 }
 
 function passStatus(pass: GatePass): 'active' | 'upcoming' | 'expired' | 'pending_approval' | 'declined' {
-  if (pass.extended && pass.approvalStatus === 'pending')  return 'pending_approval'
-  if (pass.extended && pass.approvalStatus === 'declined') return 'declined'
+  if (pass.extended) {
+    if (pass.approvalStatus === 'declined') return 'declined'
+    if (!pass.approvalStatus || pass.approvalStatus === 'pending') {
+      const hoursSince = (Date.now() - new Date(pass.createdAt).getTime()) / 3_600_000
+      if (hoursSince >= 48) return 'expired'
+      // Within 48h: usable, fall through to date check
+    }
+  }
   const today = new Date().toISOString().slice(0, 10)
   if (today > pass.departureDate) return 'expired'
   if (today < pass.arrivalDate)   return 'upcoming'
@@ -55,6 +61,10 @@ export default function PassSharePage() {
   const upcoming = status === 'upcoming'
   const pendingApproval = status === 'pending_approval'
   const declined        = status === 'declined'
+  const isPending = pass.extended && pass.approvalStatus === 'pending'
+  const hoursLeft = isPending
+    ? Math.ceil(Math.max(0, 48 - (Date.now() - new Date(pass.createdAt).getTime()) / 3_600_000))
+    : 0
 
   return (
     <div className="min-h-svh flex flex-col bg-gray-100 safe-top safe-bottom">
@@ -166,11 +176,20 @@ export default function PassSharePage() {
           </div>
         )}
 
+        {isPending && (
+          <div className="bg-amber-50 rounded-2xl border border-amber-200 px-4 py-3 flex items-start gap-2">
+            <span className="text-amber-500 mt-0.5">⏳</span>
+            <p className="text-sm text-amber-700">
+              Pending admin approval · valid for another <strong>{hoursLeft}h</strong>
+            </p>
+          </div>
+        )}
+
         {pendingApproval ? (
           <div className="bg-amber-50 rounded-2xl border border-amber-200 p-6 text-center">
-            <p className="text-base font-semibold text-amber-700">Awaiting Admin Approval</p>
+            <p className="text-base font-semibold text-amber-700">Pass Expired — Not Approved</p>
             <p className="text-sm text-amber-600 mt-1">
-              This extended pass must be approved before it can be used. The resident will send you an updated link once approved.
+              This extended pass was not approved within 48 hours. Please contact the resident for a new pass.
             </p>
           </div>
         ) : declined ? (

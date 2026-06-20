@@ -49,8 +49,8 @@ export default function PollCommentsSheet({ poll, onClose, onAddComment }: Props
       />
 
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl transition-transform duration-300 safe-bottom"
-        style={{ transform: isOpen ? 'translateY(0)' : 'translateY(100%)', height: '75vh' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
+        style={{ maxHeight: '70vh', minHeight: '40vh', transform: isOpen ? 'translateY(0)' : 'translateY(100%)' }}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3">
@@ -69,7 +69,7 @@ export default function PollCommentsSheet({ poll, onClose, onAddComment }: Props
         </div>
 
         {/* Comments list */}
-        <div ref={listRef} className="flex-1 overflow-y-auto px-5 py-3 space-y-4" style={{ height: 'calc(75vh - 130px)' }}>
+        <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto px-5 py-3 space-y-4">
           {poll?.comments.length === 0 && (
             <p className="text-center text-gray-400 text-sm mt-6">No comments yet. Be the first!</p>
           )}
@@ -92,7 +92,7 @@ export default function PollCommentsSheet({ poll, onClose, onAddComment }: Props
         </div>
 
         {/* Input */}
-        <div className="px-4 py-3 border-t border-gray-100 flex gap-2 items-center">
+        <div className="px-4 pt-3 border-t border-gray-100 flex gap-2 items-center" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
           <input
             type="text"
             value={text}

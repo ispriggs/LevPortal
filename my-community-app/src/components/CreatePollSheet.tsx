@@ -61,18 +61,18 @@ export default function CreatePollSheet({ open, onClose, onSave }: Props) {
         onClick={handleClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl transition-transform duration-300 safe-bottom"
-        style={{ transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
+        style={{ maxHeight: '70vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
-        <div className="flex justify-center pt-3">
+        <div className="flex justify-center pt-3 flex-shrink-0">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
         </div>
-        <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100 flex-shrink-0">
           <h2 className="text-lg font-bold text-gray-900">Create Poll</h2>
           <button onClick={handleClose} className="p-1 text-gray-400"><X size={20} /></button>
         </div>
 
-        <div className="overflow-y-auto max-h-[78vh] px-6 py-4 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
 
           {/* Title */}
           <div>

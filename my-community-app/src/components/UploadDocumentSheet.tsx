@@ -14,12 +14,12 @@ export const FOLDERS = [
 export type DocFolder = typeof FOLDERS[number]
 
 export const FOLDER_COLORS: Record<DocFolder, string> = {
-  'Governing Documents':  '#4a8a4a',
-  'Meeting Records':      '#c9893a',
-  'Financial':            '#2565a8',
+  'Governing Documents': '#4a8a4a',
+  'Meeting Records': '#c9893a',
+  'Financial': '#2565a8',
   'Forms & Applications': '#6838b8',
-  'Policies & Guidelines':'#1e7878',
-  'Maintenance & Projects':'#e07820',
+  'Policies & Guidelines': '#1e7878',
+  'Maintenance & Projects': '#e07820',
 }
 
 export type DocAccess = 'all' | 'owners_only'
@@ -73,10 +73,10 @@ function FolderDropdown({ value, onChange }: { value: DocFolder | ''; onChange: 
 }
 
 export default function UploadDocumentSheet({ open, onClose, onSave }: Props) {
-  const [title, setTitle]   = useState('')
+  const [title, setTitle] = useState('')
   const [folder, setFolder] = useState<DocFolder | ''>('')
   const [access, setAccess] = useState<DocAccess>('all')
-  const [file, setFile]     = useState<File | null>(null)
+  const [file, setFile] = useState<File | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   function reset() {
@@ -101,8 +101,8 @@ export default function UploadDocumentSheet({ open, onClose, onSave }: Props) {
         onClick={handleClose}
       />
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl transition-transform duration-300 safe-bottom"
-        style={{ transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
+        style={{ maxHeight: '70vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         <div className="flex justify-center pt-3">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -113,7 +113,7 @@ export default function UploadDocumentSheet({ open, onClose, onSave }: Props) {
           <button onClick={handleClose} className="p-1 text-gray-400"><X size={20} /></button>
         </div>
 
-        <div className="overflow-y-auto max-h-[78vh] px-6 py-4 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
 
           {/* Title */}
           <div>

@@ -33,7 +33,7 @@ export default function DirectoryBottomSheet({ contact, onClose }: Props) {
       {/* Sheet */}
       <div
         className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl transition-transform duration-300 safe-bottom"
-        style={{ transform: isOpen ? 'translateY(0)' : 'translateY(100%)' }}
+        style={{ maxHeight: '70vh', minHeight: '40vh', transform: isOpen ? 'translateY(0)' : 'translateY(100%)' }}
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">

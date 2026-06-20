@@ -11,6 +11,12 @@ import { useAuthStore } from '@/store/authStore'
 // (or null), so this also handles the initial page load / PWA reopen.
 supabase.auth.onAuthStateChange((_event, session) => {
   useAuthStore.getState().setSession(session)
+  if (session?.user) {
+    supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()
+      .then(({ data }) => useAuthStore.getState().setIsAdmin(data?.is_admin ?? false))
+  } else {
+    useAuthStore.getState().setIsAdmin(false)
+  }
 })
 
 createRoot(document.getElementById('root')!).render(

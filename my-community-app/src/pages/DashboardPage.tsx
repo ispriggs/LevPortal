@@ -10,6 +10,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useAuthStore, getDisplayName, getRole } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { triggerGate } from '@/lib/gate'
+import ProfileSheet from '@/components/ProfileSheet'
 
 const PRIMARY = '#243d20'
 const AMBER = '#d08a10'
@@ -24,6 +25,7 @@ type TileData = {
   badge?: number
   path: string
   ownerOnly?: boolean  // greyed out for renters
+  adminOnly?: boolean  // hidden entirely for non-admins
 }
 
 const TILES: TileData[] = [
@@ -35,9 +37,9 @@ const TILES: TileData[] = [
   { id: 'events', label: 'Events', Icon: CalendarDays, bg: '#585878', color: '#d8d8e0', path: '/events' },
   { id: 'faq', label: 'FAQ', Icon: MessageCircle, bg: '#b5cbc0', color: '#4e7860', path: '/faq' },
   { id: 'gate', label: 'Gate', Icon: QrCode, bg: '#98bcb0', color: '#387868', path: '/gate' },
-  { id: 'proposals', label: 'Proposals', Icon: ClipboardList, bg: '#d8cba8', color: '#986830', path: '/proposals', ownerOnly: true },
+  { id: 'proposals', label: 'Proposals', Icon: ClipboardList, bg: '#d8cba8', color: '#986830', path: '/proposals' },
   { id: 'ae', label: 'A&E', Icon: ShieldAlert, bg: '#f5a5a5', color: '#cc2828', path: '/ae' },
-  { id: 'admin', label: 'Admin', Icon: Users, bg: '#eeada0', color: '#c03828', path: '/admin', badge: 7, ownerOnly: true },
+  { id: 'admin', label: 'Admin', Icon: Users, bg: '#eeada0', color: '#c03828', path: '/admin', badge: 7, adminOnly: true },
   { id: 'amenities', label: 'Amenities', Icon: Waves, bg: '#c5b5e0', color: '#6838b8', path: '/amenities' },
   { id: 'flora', label: 'Flora &\nFauna', Icon: Leaf, bg: '#a5cf95', color: '#358028', path: '/flora-fauna' },
   { id: 'hiking', label: 'Hiking', Icon: Footprints, bg: '#95bdd8', color: '#2565a8', path: '/hiking' },
@@ -67,9 +69,9 @@ function Tile({
           {data.badge}
         </span>
       )}
-      <data.Icon size={26} color={data.color} strokeWidth={1.5} />
+      <data.Icon size={36} color={data.color} strokeWidth={1.5} />
       <span
-        className="text-[11px] font-semibold text-center leading-tight whitespace-pre-line"
+        className="text-[14px] font-semibold text-center leading-tight whitespace-pre-line"
         style={{ color: data.color }}
       >
         {data.label}
@@ -97,10 +99,12 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
+  const isAdmin = useAuthStore((s) => s.isAdmin)
   const displayName = getDisplayName(user)
-  const role = getRole(user)          // 'owner' | 'renter'
+  const role = getRole(user)
   const isRenter = role === 'renter'
 
+  const [profileOpen, setProfileOpen] = useState(false)
   const [enterCooldown, setEnterCooldown] = useState(false)
   const [exitCooldown, setExitCooldown] = useState(false)
   const [toast, setToast] = useState<{ action: 'enter' | 'exit'; ok: boolean } | null>(null)
@@ -131,17 +135,17 @@ export default function DashboardPage() {
     navigate('/login', { replace: true })
   }
 
-  const mainTiles = TILES.slice(0, 12)
-  const bottomTiles = TILES.slice(12)
+  const visibleTiles = TILES.filter((t) => !t.adminOnly || isAdmin)
+  const mainTiles = visibleTiles.slice(0, 12)
+  const bottomTiles = visibleTiles.slice(12)
 
   return (
     <div className="min-h-svh flex flex-col" style={{ backgroundColor: PAGE_BG }}>
 
       {/* Header */}
-      <header className="safe-top px-4 pt-4 pb-3" style={{ backgroundColor: PRIMARY }}>
+      <header className="px-4 pb-3" style={{ backgroundColor: PRIMARY, paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-green-300 text-xs">Welcome back</p>
             <h1 className="text-white text-xl font-bold leading-tight">{displayName}</h1>
             {isRenter && (
               <span className="text-green-400 text-xs">Renter</span>
@@ -149,8 +153,8 @@ export default function DashboardPage() {
           </div>
           <button
             className="rounded-full p-1.5 bg-white/10"
-            onClick={handleLogout}
-            aria-label="Sign out"
+            onClick={() => setProfileOpen(true)}
+            aria-label="My profile"
           >
             <User size={22} color="white" />
           </button>
@@ -264,6 +268,12 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      <ProfileSheet
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        onLogout={handleLogout}
+      />
     </div>
   )
 }

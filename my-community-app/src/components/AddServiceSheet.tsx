@@ -104,8 +104,8 @@ export default function AddServiceSheet({ open, onClose, onSave }: Props) {
 
       {/* Sheet */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl transition-transform duration-300 safe-bottom"
-        style={{ transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl flex flex-col transition-transform duration-300 safe-bottom"
+        style={{ maxHeight: '70vh', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3">
@@ -121,7 +121,7 @@ export default function AddServiceSheet({ open, onClose, onSave }: Props) {
         </div>
 
         {/* Form */}
-        <div className="overflow-y-auto max-h-[72vh] px-6 py-4 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
 
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">Name *</label>
