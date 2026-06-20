@@ -121,7 +121,6 @@ export const useMessagesStore = create<MessagesStore>()((set) => ({
       }),
     ])
 
-    const { data: { user: currentUser } } = await supabase.auth.getUser()
     const { data: senderProfile } = await supabase
       .from('profiles')
       .select('full_name')

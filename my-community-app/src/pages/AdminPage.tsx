@@ -18,7 +18,6 @@ import {
 } from '@/store/gateStore'
 
 const PRIMARY   = '#243d20'
-const AMBER     = '#d08a10'
 const RED       = '#c03828'
 const BLUE      = '#2565a8'
 const PURPLE    = '#6838b8'
@@ -470,9 +469,9 @@ function AdminTicketCard({ ticket, onManage }: { ticket: Ticket; onManage: () =>
 
 // Full-screen ticket management view for admin
 function TicketManageView({
-  ticket, adminName, allTickets, onBack, onMessage, onStatusChange, onAddNote,
+  ticket, allTickets, onBack, onMessage, onStatusChange, onAddNote,
 }: {
-  ticket: Ticket; adminName: string; allTickets: Ticket[]
+  ticket: Ticket; allTickets: Ticket[]
   onBack: () => void; onMessage: () => void
   onStatusChange: (id: string, status: TicketStatus) => void
   onAddNote: (id: string, text: string) => void
@@ -893,7 +892,6 @@ export default function AdminPage() {
       {managingTicket && (
         <TicketManageView
           ticket={managingTicket}
-          adminName={adminName}
           allTickets={allTickets}
           onBack={() => setManagingTicket(null)}
           onMessage={() => {

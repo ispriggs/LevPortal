@@ -261,9 +261,6 @@ function TicketDetailView({
   onComment: (text: string) => void
 }) {
   const [text, setText] = useState('')
-  const catCfg = CATEGORY_CONFIG[ticket.category]
-  const priCfg = PRIORITY_CONFIG[ticket.priority]
-  const staCfg = STATUS_CONFIG[ticket.status]
 
   function handleSend() {
     if (!text.trim()) return

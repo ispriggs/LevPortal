@@ -105,8 +105,6 @@ export default function DirectoryPage() {
         service:    data.service,
         location:   data.location,
         phone:      data.phone,
-        email:      data.email || null,
-        whatsapp:   data.whatsapp || null,
         created_by: user?.id ?? null,
       })
       .select()
