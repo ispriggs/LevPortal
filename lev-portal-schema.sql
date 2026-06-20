@@ -450,6 +450,10 @@ create policy "Pass creator can delete own pass"
   on public.gate_passes for delete
   to authenticated using (created_by = auth.uid());
 
+create policy "Owners can delete passes"
+  on public.gate_passes for delete
+  to authenticated using (public.user_role() = 'owner');
+
 
 -- ════════════════════════════════════════════════════════════════
 -- 8. MESSAGES

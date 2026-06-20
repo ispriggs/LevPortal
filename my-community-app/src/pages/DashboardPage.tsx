@@ -115,8 +115,6 @@ export default function DashboardPage() {
   const isRenter = role === 'renter'
   const lot = user?.user_metadata?.lot as string | undefined
   const roleBadge = isAdmin ? 'Admin' : role === 'owner' ? 'Owner' : 'Renter'
-  const firstName = displayName.split(' ')[0]
-
   const [profileOpen, setProfileOpen] = useState(false)
   const [enterCooldown, setEnterCooldown] = useState(false)
   const [exitCooldown, setExitCooldown] = useState(false)

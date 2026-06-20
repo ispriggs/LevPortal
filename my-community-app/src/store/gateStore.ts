@@ -155,11 +155,9 @@ export const useGateStore = create<GateStore>()((set) => ({
   },
 
   declinePass: async (passId) => {
-    await supabase.from('gate_passes').update({ approval_status: 'declined' }).eq('id', passId)
+    await supabase.from('gate_passes').delete().eq('id', passId)
     set((s) => ({
-      passes: s.passes.map((p) =>
-        p.id === passId ? { ...p, approvalStatus: 'declined' as ApprovalStatus } : p
-      ),
+      passes: s.passes.filter((p) => p.id !== passId),
     }))
   },
 }))

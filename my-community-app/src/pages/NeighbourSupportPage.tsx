@@ -211,7 +211,6 @@ function TicketDetailView({
 // ── Ticket Card ───────────────────────────────────────────────────────────
 
 function TicketCard({ ticket, onClick }: { ticket: Ticket; onClick: () => void }) {
-  const cat = CATEGORY_CONFIG[ticket.category]
   const commentCount = ticket.history.filter((h) => h.type === 'comment').length
 
   return (
