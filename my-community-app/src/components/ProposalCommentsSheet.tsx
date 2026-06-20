@@ -45,7 +45,7 @@ export default function ProposalCommentsSheet({
       />
       <div
         className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl flex flex-col transition-transform duration-300 sheet-safe-bottom"
-        style={{ maxHeight: 'calc(85vh - var(--keyboard-h, 0px))', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)' }}
+        style={{ maxHeight: 'calc(85vh - var(--keyboard-h, 0px))', minHeight: '40vh', transform: open ? 'translateY(0)' : 'translateY(100%)', pointerEvents: open ? 'auto' : 'none' }}
       >
         <div className="flex justify-center pt-3">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
