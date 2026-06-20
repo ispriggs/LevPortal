@@ -1,15 +1,22 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import levLogo from '@/assets/Stylized_Leaf_Logo_Design_Fotor-removebg-preview.png'
 
 const YELLOW = '#F5C200'
 const BG = 'radial-gradient(ellipse at 50% 30%, #2d6b27 0%, #182f15 100%)'
+const BG_BOTTOM = '#182f15'
 
 export default function LoginPage() {
   const navigate = useNavigate()
 
+  useEffect(() => {
+    document.body.style.backgroundColor = BG_BOTTOM
+    return () => { document.body.style.backgroundColor = '' }
+  }, [])
+
   return (
     <div
-      className="min-h-svh flex flex-col items-center justify-between px-6 pt-20 pb-16"
+      className="min-h-svh flex flex-col items-center justify-between px-6 pt-20 pb-16 safe-bottom"
       style={{ background: BG }}
     >
       {/* Logo + name */}
