@@ -102,6 +102,11 @@ export const useGateStore = create<GateStore>()((set) => ({
 
   fetchPasses: async () => {
     set({ loading: true })
+
+    // Delete passes whose departure date has already passed
+    const today = new Date().toISOString().slice(0, 10)
+    await supabase.from('gate_passes').delete().lt('departure_date', today)
+
     const { data: rows } = await supabase
       .from('gate_passes')
       .select('*')

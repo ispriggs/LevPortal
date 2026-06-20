@@ -637,6 +637,53 @@ function ProposalManageView({
   )
 }
 
+// ── Pass Decline Sheet ────────────────────────────────────────────────────────
+
+function PassDeclineSheet({
+  open, pass, onClose, onDecline,
+}: { open: boolean; pass: GatePass | null; onClose: () => void; onDecline: (id: string, reason: string) => void }) {
+  const [reason, setReason] = useState('')
+  function handleDecline() {
+    if (!reason.trim() || !pass) return
+    onDecline(pass.id, reason.trim())
+    setReason('')
+    onClose()
+  }
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/50 z-40" style={{ opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity .3s' }} onClick={onClose} />
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl max-w-md mx-auto shadow-2xl safe-bottom" style={{ maxHeight: '80vh', transform: open ? 'translateY(0)' : 'translateY(100%)', transition: 'transform .3s' }}>
+        <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-gray-300 rounded-full" /></div>
+        <div className="flex items-center justify-between px-6 pt-3 pb-3 border-b border-gray-100">
+          <h2 className="text-base font-bold text-gray-900">Decline Extended Pass</h2>
+          <button onClick={onClose} className="p-1 text-gray-400"><X size={20} /></button>
+        </div>
+        <div className="px-6 py-4 space-y-3">
+          {pass && (
+            <div className="p-3 bg-gray-50 rounded-xl text-sm">
+              <p className="font-semibold text-gray-900">{pass.visitorName}</p>
+              <p className="text-gray-500">Requested by {pass.createdBy} · Lot {pass.visitingLot}</p>
+            </div>
+          )}
+          <div className="flex items-start gap-2 p-3 bg-red-50 rounded-xl">
+            <AlertCircle size={15} className="text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-red-700">A message with this reason will be sent to the resident. The pass will be permanently deleted.</p>
+          </div>
+          <textarea
+            value={reason} onChange={(e) => setReason(e.target.value)}
+            placeholder="Enter reason for declining…"
+            rows={4}
+            className="w-full border border-gray-300 rounded-xl px-3 py-3 text-base text-gray-900 outline-none focus:border-red-500 resize-none"
+          />
+          <button onClick={handleDecline} disabled={!reason.trim()} className="w-full py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-40" style={{ backgroundColor: RED }}>
+            <X size={15} /> Confirm Decline
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
+
 // ── Extended Pass Card ────────────────────────────────────────────────────────
 
 function ExtendedPassCard({
@@ -702,7 +749,13 @@ export default function AdminPage() {
   const startThread = useMessagesStore((s) => s.startThread)
 
   const { tickets: allTickets, updateStatus: storeUpdateStatus, addComment: storeAddComment, fetchTickets } = useTicketsStore()
-  const { passes: allPasses, approvePass, declinePass, fetchPasses } = useGateStore()
+  const { passes: allPasses, approvePass, declinePass: storeDeclinePass, fetchPasses } = useGateStore()
+
+  async function handleDeclinePass(passId: string, reason: string) {
+    const pass = allPasses.find((p) => p.id === passId)
+    await storeDeclinePass(passId)
+    if (pass) setMsgSheet({ to: pass.createdBy, subject: `Re: Extended Pass Declined — ${pass.visitorName} · ${reason}` })
+  }
 
   useEffect(() => {
     fetchTickets()
@@ -850,6 +903,7 @@ export default function AdminPage() {
   const [msgSheet, setMsgSheet] = useState<{ to: string; subject: string } | null>(null)
   const [declineSignup, setDeclineSignup] = useState<PendingSignup | null>(null)
   const [previewDoc, setPreviewDoc] = useState<PendingDoc | null>(null)
+  const [declinePassTarget, setDeclinePassTarget] = useState<GatePass | null>(null)
 
   // ── Doc actions
   async function approveDoc(id: string) {
@@ -1103,7 +1157,7 @@ export default function AdminPage() {
                   key={p.id}
                   pass={p}
                   onApprove={() => approvePass(p.id)}
-                  onDecline={() => declinePass(p.id)}
+                  onDecline={() => setDeclinePassTarget(p)}
                 />
               ))}
           </>
@@ -1152,6 +1206,12 @@ export default function AdminPage() {
         signup={declineSignup}
         onClose={() => setDeclineSignup(null)}
         onDecline={declineSignupFn}
+      />
+      <PassDeclineSheet
+        open={!!declinePassTarget}
+        pass={declinePassTarget}
+        onClose={() => setDeclinePassTarget(null)}
+        onDecline={handleDeclinePass}
       />
       <DocPreviewSheet
         doc={previewDoc}

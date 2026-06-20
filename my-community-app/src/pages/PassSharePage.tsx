@@ -59,9 +59,10 @@ export default function PassSharePage() {
   const cfg     = PASS_TYPE_CONFIG[pass.type]
   const expired  = status === 'expired'
   const upcoming = status === 'upcoming'
-  const pendingApproval = status === 'pending_approval'
-  const declined        = status === 'declined'
+  const declined = status === 'declined'
   const isPending = pass.extended && pass.approvalStatus === 'pending'
+  const expiredWithoutApproval = expired && pass.extended &&
+    (!pass.approvalStatus || pass.approvalStatus === 'pending')
   const hoursLeft = isPending
     ? Math.ceil(Math.max(0, 48 - (Date.now() - new Date(pass.createdAt).getTime()) / 3_600_000))
     : 0
@@ -84,7 +85,7 @@ export default function PassSharePage() {
               UPCOMING
             </span>
           )}
-          {pendingApproval && (
+          {isPending && !expired && (
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-400 text-white text-xs font-bold">
               PENDING APPROVAL
             </span>
@@ -94,7 +95,7 @@ export default function PassSharePage() {
               DECLINED
             </span>
           )}
-          {!expired && !upcoming && !pendingApproval && !declined && (
+          {!expired && !upcoming && !isPending && !declined && (
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-400 text-white text-xs font-bold">
               ACTIVE
             </span>
@@ -185,7 +186,7 @@ export default function PassSharePage() {
           </div>
         )}
 
-        {pendingApproval ? (
+        {expiredWithoutApproval ? (
           <div className="bg-amber-50 rounded-2xl border border-amber-200 p-6 text-center">
             <p className="text-base font-semibold text-amber-700">Pass Expired — Not Approved</p>
             <p className="text-sm text-amber-600 mt-1">
