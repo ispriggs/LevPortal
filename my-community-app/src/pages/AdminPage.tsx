@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Check, X, Send, MessageSquare,
@@ -6,6 +6,7 @@ import {
   ChevronDown, ChevronUp, AlertCircle, Eye, ExternalLink, QrCode,
 } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
+import { supabase } from '@/lib/supabase'
 import { useMessagesStore } from '@/store/messagesStore'
 import {
   useTicketsStore, type Ticket, type TicketStatus, type TicketPriority,
@@ -31,7 +32,7 @@ type ProposalStatus = 'pending' | 'in_review' | 'assigned' | 'completed' | 'decl
 type PendingDoc = {
   id: string; title: string; folder: string; uploadedBy: string
   uploadedAt: string; access: 'all' | 'owners_only'; status: DocStatus
-  fileUrl?: string
+  fileUrl?: string; filePath?: string
 }
 type PendingSignup = {
   id: string; name: string; email: string; role: 'owner' | 'renter'
@@ -43,25 +44,6 @@ type AdminProposal = {
   status: ProposalStatus; assignedTo?: string
 }
 
-// ── Mock data ─────────────────────────────────────────────────────────────
-
-const INIT_DOCS: PendingDoc[] = [
-  { id: 'd1', title: 'Water Test June 2026', folder: 'Maintenance & Projects', uploadedBy: 'Robert Faulstich', uploadedAt: '2026-06-19T10:42:00Z', access: 'owners_only', status: 'pending' },
-  { id: 'd2', title: 'AGM Agenda July 2026', folder: 'Meeting Records', uploadedBy: 'Jessica Scully', uploadedAt: '2026-06-18T14:20:00Z', access: 'all', status: 'pending' },
-]
-
-const INIT_SIGNUPS: PendingSignup[] = [
-  { id: 's1', name: 'Carlos Mendez',  email: 'carlos@example.com', role: 'owner',  lot: '12', submittedAt: '2026-06-19T08:00:00Z', status: 'pending' },
-  { id: 's2', name: 'Maria Santos',   email: 'maria@example.com',  role: 'renter',            submittedAt: '2026-06-18T16:30:00Z', status: 'pending' },
-  { id: 's3', name: 'Tom Walker',     email: 'tom@example.com',    role: 'owner',  lot: '7',  submittedAt: '2026-06-17T11:00:00Z', status: 'pending' },
-]
-
-const INIT_PROPOSALS: AdminProposal[] = [
-  { id: 'p1', title: 'Low Ropes Course',          description: 'Build a low ropes kids course on vacant lot #39 — creating a safe, engaging outdoor space where children can climb, balance, and develop confidence.',                         submittedBy: 'Ian Spriggs',       submittedAt: '2026-06-01T09:00:00Z', status: 'in_review' },
-  { id: 'p2', title: 'Community Garden Extension', description: 'Extend the existing community garden along the eastern fence line with 12 new raised beds available for resident allocation.',                                              submittedBy: 'Chantelle Spriggs', submittedAt: '2026-06-10T14:00:00Z', status: 'pending' },
-  { id: 'p3', title: 'Solar Panel Initiative',     description: 'Community-wide solar panel installation across all common area rooftops. Estimated 40% reduction in common electricity costs over 5 years.',                               submittedBy: 'Robert Faulstich',  submittedAt: '2026-05-20T10:00:00Z', status: 'assigned', assignedTo: 'Green Energy Committee' },
-  { id: 'p4', title: 'New Entrance Gate Design',   description: 'Redesign the main entrance gate with improved security features, intercom system, and landscaping to enhance the first impression of the community.',                       submittedBy: 'Jessica Scully',    submittedAt: '2026-05-15T11:00:00Z', status: 'completed' },
-]
 
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -662,14 +644,69 @@ export default function AdminPage() {
   const adminName    = getDisplayName(user)
   const startThread  = useMessagesStore((s) => s.startThread)
 
-  const { tickets: allTickets, updateStatus: storeUpdateStatus, addComment: storeAddComment } = useTicketsStore()
-  const { passes: allPasses, approvePass, declinePass } = useGateStore()
+  const { tickets: allTickets, updateStatus: storeUpdateStatus, addComment: storeAddComment, fetchTickets } = useTicketsStore()
+  const { passes: allPasses, approvePass, declinePass, fetchPasses } = useGateStore()
+
+  useEffect(() => {
+    fetchTickets()
+    fetchPasses()
+  }, [])
   const [managingTicket, setManagingTicket] = useState<Ticket | null>(null)
 
   const [activeTab,   setActiveTab]   = useState<Tab>('docs')
-  const [docs,        setDocs]        = useState<PendingDoc[]>(INIT_DOCS)
-  const [signups,     setSignups]     = useState<PendingSignup[]>(INIT_SIGNUPS)
-  const [proposals,   setProposals]   = useState<AdminProposal[]>(INIT_PROPOSALS)
+  const [docs,        setDocs]        = useState<PendingDoc[]>([])
+  const [signups,     setSignups]     = useState<PendingSignup[]>([])
+  const [proposals,   setProposals]   = useState<AdminProposal[]>([])
+
+  const loadDocs = useCallback(async () => {
+    const { data: rows } = await supabase
+      .from('documents')
+      .select('*')
+      .order('uploaded_at', { ascending: false })
+    if (!rows) return
+
+    const uids = [...new Set(rows.map((r) => r.uploaded_by).filter(Boolean))]
+    const { data: profiles } = uids.length
+      ? await supabase.from('profiles').select('id, full_name').in('id', uids)
+      : { data: [] }
+    const nameMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p.full_name]))
+
+    setDocs(rows.map((r) => ({
+      id:         r.id,
+      title:      r.title,
+      folder:     r.folder,
+      uploadedBy: nameMap[r.uploaded_by] ?? 'Unknown',
+      uploadedAt: r.uploaded_at,
+      access:     r.access as 'all' | 'owners_only',
+      status:     r.status as DocStatus,
+      fileUrl:    r.file_url,
+      filePath:   r.file_path,
+    })))
+  }, [])
+
+  const loadSignups = useCallback(async () => {
+    const { data: rows } = await supabase
+      .from('profiles')
+      .select('id, full_name, role, lot, phone, created_at')
+      .order('created_at', { ascending: false })
+    if (!rows) return
+    setSignups(rows.map((r) => ({
+      id:          r.id,
+      name:        r.full_name,
+      email:       r.phone ?? '',
+      role:        r.role as 'owner' | 'renter',
+      lot:         r.lot ?? undefined,
+      submittedAt: r.created_at,
+      status:      'approved' as SignupStatus,
+    })))
+  }, [])
+
+  useEffect(() => {
+    fetchTickets()
+    fetchPasses()
+    loadDocs()
+    loadSignups()
+  }, [])
 
   // Sheet state
   const [msgSheet,       setMsgSheet]       = useState<{ to: string; subject: string } | null>(null)
@@ -678,12 +715,17 @@ export default function AdminPage() {
   const [previewDoc,     setPreviewDoc]     = useState<PendingDoc | null>(null)
 
   // ── Doc actions
-  function approveDoc(id: string) {
+  async function approveDoc(id: string) {
+    await supabase.from('documents').update({ status: 'approved' }).eq('id', id)
     setDocs((p) => p.map((d) => d.id !== id ? d : { ...d, status: 'approved' }))
   }
-  function declineDoc(id: string) {
+  async function declineDoc(id: string) {
     const doc = docs.find((d) => d.id === id)!
-    setDocs((p) => p.map((d) => d.id !== id ? d : { ...d, status: 'declined' }))
+    await Promise.all([
+      supabase.from('documents').delete().eq('id', id),
+      doc.filePath ? supabase.storage.from('documents').remove([doc.filePath]) : Promise.resolve(),
+    ])
+    setDocs((p) => p.filter((d) => d.id !== id))
     setMsgSheet({ to: doc.uploadedBy, subject: `Re: Document declined — ${doc.title}` })
   }
 
@@ -718,7 +760,7 @@ export default function AdminPage() {
   }
 
   const pendingDocs      = docs.filter((d) => d.status === 'pending').length
-  const pendingSignups   = signups.filter((s) => s.status === 'pending').length
+  const pendingSignups   = 0
   const pendingProposals = proposals.filter((p) => p.status === 'pending').length
   const openTickets      = allTickets.filter((t) => t.status === 'open').length
   const pendingPasses    = allPasses.filter((p) => p.extended && p.approvalStatus === 'pending').length
@@ -780,7 +822,14 @@ export default function AdminPage() {
           <>
             {docs.length === 0 && <p className="text-sm text-gray-400 text-center py-12">No documents to review.</p>}
             {docs.map((d) => (
-              <DocItem key={d.id} doc={d} onPreview={() => setPreviewDoc(d)} />
+              <DocItem key={d.id} doc={d} onPreview={async () => {
+                if (d.filePath) {
+                  const { data } = await supabase.storage.from('documents').createSignedUrl(d.filePath, 3600)
+                  setPreviewDoc({ ...d, fileUrl: data?.signedUrl ?? d.fileUrl })
+                } else {
+                  setPreviewDoc(d)
+                }
+              }} />
             ))}
           </>
         )}

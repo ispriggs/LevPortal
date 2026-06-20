@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
@@ -52,9 +52,18 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-600">
+                Password
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-xs font-medium"
+                style={{ color: PRIMARY }}
+              >
+                Forgot password?
+              </Link>
+            </div>
             <input
               type="password"
               value={password}
@@ -76,6 +85,13 @@ export default function LoginPage() {
           >
             {loading ? 'Signing in…' : 'Sign In'}
           </button>
+
+          <p className="text-center text-sm text-gray-500">
+            Don't have an account?{' '}
+            <Link to="/signup" className="font-semibold" style={{ color: PRIMARY }}>
+              Sign Up
+            </Link>
+          </p>
 
           {/* DEV ONLY — remove when Supabase auth is wired up */}
           <div className="flex gap-2">

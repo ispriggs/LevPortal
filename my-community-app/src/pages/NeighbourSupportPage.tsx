@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Plus, Search, ChevronRight, Send, X,
@@ -420,7 +420,9 @@ export default function NeighbourSupportPage() {
   const navigate    = useNavigate()
   const user        = useAuthStore((s) => s.user)
   const displayName = getDisplayName(user)
-  const { tickets: allTickets, submitTicket, addComment } = useTicketsStore()
+  const { tickets: allTickets, submitTicket, addComment, fetchTickets } = useTicketsStore()
+
+  useEffect(() => { fetchTickets() }, [])
 
   const [submitOpen,     setSubmitOpen]     = useState(false)
   const [selectedId,     setSelectedId]     = useState<string | null>(null)
@@ -454,9 +456,9 @@ export default function NeighbourSupportPage() {
 
   const selectedTicket = selectedId ? (allTickets.find((t) => t.id === selectedId) ?? null) : null
 
-  function handleSubmit(data: SubmitTicketData, _file: File | null) {
-    const num = submitTicket(data)
-    showToast(`${num} submitted successfully!`)
+  async function handleSubmit(data: SubmitTicketData, _file: File | null) {
+    const num = await submitTicket(data)
+    if (num) showToast(`${num} submitted successfully!`)
     setSubmitOpen(false)
   }
 

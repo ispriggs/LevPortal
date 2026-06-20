@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Send, MessageSquare, ChevronRight } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
@@ -113,7 +113,9 @@ export default function MessagesPage() {
   const navigate     = useNavigate()
   const user         = useAuthStore((s) => s.user)
   const currentUser  = getDisplayName(user)
-  const { threads, reply } = useMessagesStore()
+  const { threads, reply, fetchThreads } = useMessagesStore()
+
+  useEffect(() => { fetchThreads() }, [])
 
   const [openThread, setOpenThread] = useState<MessageThread | null>(null)
 

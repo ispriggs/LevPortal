@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
 import CreatePostSheet from '@/components/CreatePostSheet'
 import NewsCommentsSheet from '@/components/NewsCommentsSheet'
 import type { CreatePostData } from '@/components/CreatePostSheet'
+import { supabase } from '@/lib/supabase'
 
 const PRIMARY = '#243d20'
 
@@ -25,47 +26,11 @@ export type NewsPost = {
   comments: NewsComment[]
 }
 
-const INITIAL_POSTS: NewsPost[] = [
-  {
-    id: '1',
-    author: 'Chantelle Spriggs',
-    title: 'LEV Talent Show',
-    content: `Hi dear neighbors! The Culture Circle is excited to announce the revival of LEV's talent shows!!!
-
-We invite you to save the date & pre-register using the form in the community WhatsApp group 👇
-
-This is an all-ages event and will also be open to the whole valley!
-
-We are also looking for:
-- Any musicians willing to offer their skills to support young singers
-- A microphone
-- Speakers
-- Extra chairs for the event
-
-PM me if you want to offer any equipment or skills for any of the above! Let's make this a wonderful community event together. 🎉`,
-    createdAt: '2026-05-20T10:00:00Z',
-    comments: [
-      {
-        id: 'c1',
-        author: 'Ian Spriggs',
-        text: 'Such a great initiative! We\'ll definitely be there.',
-        createdAt: new Date(Date.now() - 7200000).toISOString(),
-      },
-    ],
-  },
-  {
-    id: '2',
-    author: 'Jessica Scully',
-    title: 'Weekend Trail Clean-Up',
-    content: `Reminder that this Saturday we are organising a trail clean-up starting at 8am at the main entrance.
-
-Bring gloves, bags, and water. Should take about 2 hours and we'll have coffee and snacks ready afterwards for everyone who joins.
-
-All welcome — the more the merrier!`,
-    createdAt: '2026-05-18T08:30:00Z',
-    comments: [],
-  },
-]
+async function fetchNameMap(uids: string[]): Promise<Record<string, string>> {
+  if (!uids.length) return {}
+  const { data } = await supabase.from('profiles').select('id, full_name').in('id', uids)
+  return Object.fromEntries((data ?? []).map((p) => [p.id, p.full_name]))
+}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -164,29 +129,89 @@ export default function NewsPage() {
   const user = useAuthStore((s) => s.user)
   const displayName = getDisplayName(user)
 
-  const [posts, setPosts] = useState<NewsPost[]>(INITIAL_POSTS)
+  const [posts, setPosts] = useState<NewsPost[]>([])
   const [createOpen, setCreateOpen] = useState(false)
   const [commentPost, setCommentPost] = useState<NewsPost | null>(null)
 
-  function handleCreatePost(data: CreatePostData) {
+  useEffect(() => {
+    async function load() {
+      const [{ data: postRows }, { data: commentRows }] = await Promise.all([
+        supabase.from('news_posts').select('*').order('created_at', { ascending: false }),
+        supabase.from('news_comments').select('*').order('created_at', { ascending: true }),
+      ])
+      if (!postRows) return
+
+      const comments = commentRows ?? []
+      const uids = [...new Set([
+        ...postRows.map((r) => r.author_id),
+        ...comments.map((c) => c.author_id),
+      ].filter(Boolean))]
+      const nameMap = await fetchNameMap(uids)
+
+      setPosts(postRows.map((p) => ({
+        id:        p.id,
+        author:    nameMap[p.author_id] ?? 'Unknown',
+        title:     p.title ?? '',
+        content:   p.content,
+        imageUrl:  p.image_url ?? undefined,
+        createdAt: p.created_at,
+        comments:  comments
+          .filter((c) => c.post_id === p.id)
+          .map((c) => ({
+            id:        c.id,
+            author:    nameMap[c.author_id] ?? 'Unknown',
+            text:      c.text,
+            createdAt: c.created_at,
+          })),
+      })))
+    }
+    load()
+  }, [])
+
+  async function handleCreatePost(data: CreatePostData) {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) return
+
+    const { data: row } = await supabase
+      .from('news_posts')
+      .insert({
+        author_id: authUser.id,
+        title:     data.title || null,
+        content:   data.content,
+        image_url: data.imageUrl || null,
+      })
+      .select()
+      .single()
+
+    if (!row) return
     const newPost: NewsPost = {
-      id: Date.now().toString(),
-      author: displayName,
-      title: data.title,
-      content: data.content,
-      imageUrl: data.imageUrl,
-      createdAt: new Date().toISOString(),
-      comments: [],
+      id:        row.id,
+      author:    displayName,
+      title:     row.title ?? '',
+      content:   row.content,
+      imageUrl:  row.image_url ?? undefined,
+      createdAt: row.created_at,
+      comments:  [],
     }
     setPosts((prev) => [newPost, ...prev])
   }
 
-  function handleAddComment(postId: string, text: string) {
+  async function handleAddComment(postId: string, text: string) {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) return
+
+    const { data: row } = await supabase
+      .from('news_comments')
+      .insert({ post_id: postId, author_id: authUser.id, text })
+      .select()
+      .single()
+
+    if (!row) return
     const comment: NewsComment = {
-      id: Date.now().toString(),
-      author: displayName,
-      text,
-      createdAt: new Date().toISOString(),
+      id:        row.id,
+      author:    displayName,
+      text:      row.text,
+      createdAt: row.created_at,
     }
     setPosts((prev) =>
       prev.map((p) =>
@@ -198,7 +223,9 @@ export default function NewsPage() {
     )
   }
 
-  function handleDeleteComment(postId: string, commentId: string) {
+  async function handleDeleteComment(postId: string, commentId: string) {
+    await supabase.from('news_comments').delete().eq('id', commentId)
+
     setPosts((prev) =>
       prev.map((p) =>
         p.id !== postId ? p : { ...p, comments: p.comments.filter((c) => c.id !== commentId) }

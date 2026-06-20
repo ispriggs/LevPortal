@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Upload, User, Eye, Calendar, Trash2, FileText, Clock } from 'lucide-react'
 import { useAuthStore, getDisplayName, getRole } from '@/store/authStore'
@@ -6,6 +6,7 @@ import UploadDocumentSheet, {
   FOLDERS, FOLDER_COLORS,
   type DocFolder, type DocAccess, type UploadDocData,
 } from '@/components/UploadDocumentSheet'
+import { supabase } from '@/lib/supabase'
 
 const PRIMARY = '#243d20'
 
@@ -20,50 +21,14 @@ export type CommunityDoc = {
   uploadedBy: string
   uploadedAt: string
   fileUrl: string
+  filePath: string
 }
 
-const MOCK_DOCS: CommunityDoc[] = [
-  {
-    id: '1',
-    title: 'Board Meeting Minutes June 19, 2026',
-    folder: 'Meeting Records',
-    access: 'owners_only',
-    status: 'approved',
-    uploadedBy: 'John Leonard',
-    uploadedAt: '2026-06-19T11:43:00Z',
-    fileUrl: '',
-  },
-  {
-    id: '2',
-    title: 'Water Test June 2026',
-    folder: 'Maintenance & Projects',
-    access: 'owners_only',
-    status: 'approved',
-    uploadedBy: 'Robert Faulstich',
-    uploadedAt: '2026-06-19T10:42:00Z',
-    fileUrl: '',
-  },
-  {
-    id: '3',
-    title: 'Ecovilla Rules & Regulations 2026',
-    folder: 'Governing Documents',
-    access: 'all',
-    status: 'approved',
-    uploadedBy: 'Ian Spriggs',
-    uploadedAt: '2026-05-01T09:00:00Z',
-    fileUrl: '',
-  },
-  {
-    id: '4',
-    title: 'Community Budget Q1 2026',
-    folder: 'Financial',
-    access: 'owners_only',
-    status: 'approved',
-    uploadedBy: 'Ian Spriggs',
-    uploadedAt: '2026-04-15T14:00:00Z',
-    fileUrl: '',
-  },
-]
+async function fetchNameMap(uids: string[]): Promise<Record<string, string>> {
+  if (!uids.length) return {}
+  const { data } = await supabase.from('profiles').select('id, full_name').in('id', uids)
+  return Object.fromEntries((data ?? []).map((p) => [p.id, p.full_name]))
+}
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -153,10 +118,36 @@ export default function DocumentsPage() {
   const isOwner = getRole(user) === 'owner'
   const isRenter = !isOwner
 
-  const [docs, setDocs] = useState<CommunityDoc[]>(MOCK_DOCS)
+  const [docs, setDocs] = useState<CommunityDoc[]>([])
   const [uploadOpen, setUploadOpen] = useState(false)
   const [titleFilter, setTitleFilter] = useState('')
   const [folderFilter, setFolderFilter] = useState('')
+
+  useEffect(() => {
+    async function load() {
+      const { data: rows } = await supabase
+        .from('documents')
+        .select('*')
+        .order('uploaded_at', { ascending: false })
+      if (!rows) return
+
+      const uids = [...new Set(rows.map((r) => r.uploaded_by).filter(Boolean))]
+      const nameMap = await fetchNameMap(uids)
+
+      setDocs(rows.map((r) => ({
+        id:         r.id,
+        title:      r.title,
+        folder:     r.folder as DocFolder,
+        access:     r.access as DocAccess,
+        status:     r.status as DocStatus,
+        uploadedBy: nameMap[r.uploaded_by] ?? 'Unknown',
+        uploadedAt: r.uploaded_at,
+        fileUrl:    r.file_url,
+        filePath:   r.file_path,
+      })))
+    }
+    load()
+  }, [])
 
   // Visibility: owners_only hidden from renters; pending hidden from non-uploaders
   const visibleDocs = docs.filter((doc) => {
@@ -167,29 +158,71 @@ export default function DocumentsPage() {
     return true
   })
 
-  function handleUpload(data: UploadDocData) {
-    const newDoc: CommunityDoc = {
-      id: Date.now().toString(),
-      title: data.title,
-      folder: data.folder,
-      access: data.access,
-      status: 'pending',
+  async function handleUpload(data: UploadDocData) {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) return
+
+    const ext  = data.file.name.split('.').pop() ?? 'pdf'
+    const path = `${authUser.id}/${Date.now()}.${ext}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(path, data.file)
+
+    if (uploadError) return
+
+    const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(path)
+
+    const { data: row } = await supabase
+      .from('documents')
+      .insert({
+        title:       data.title,
+        folder:      data.folder,
+        access:      data.access,
+        status:      'pending',
+        uploaded_by: authUser.id,
+        file_url:    publicUrl,
+        file_path:   path,
+      })
+      .select()
+      .single()
+
+    if (!row) return
+    setDocs((prev) => [{
+      id:         row.id,
+      title:      row.title,
+      folder:     row.folder as DocFolder,
+      access:     row.access as DocAccess,
+      status:     'pending',
       uploadedBy: displayName,
-      uploadedAt: new Date().toISOString(),
-      fileUrl: URL.createObjectURL(data.file),
-    }
-    setDocs((prev) => [newDoc, ...prev])
+      uploadedAt: row.uploaded_at,
+      fileUrl:    row.file_url,
+      filePath:   row.file_path,
+    }, ...prev])
   }
 
-  function handleView(doc: CommunityDoc) {
-    if (doc.fileUrl) {
-      window.open(doc.fileUrl, '_blank')
-    } else {
-      alert('Document preview not available in demo mode. Connect Supabase storage to enable real files.')
+  async function handleView(doc: CommunityDoc) {
+    if (!doc.filePath) return
+
+    const { data } = await supabase.storage
+      .from('documents')
+      .createSignedUrl(doc.filePath, 60 * 60)
+
+    if (data?.signedUrl) {
+      window.open(data.signedUrl, '_blank')
     }
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
+    const doc = docs.find((d) => d.id === id)
+    if (!doc) return
+
+    await Promise.all([
+      supabase.from('documents').delete().eq('id', id),
+      doc.filePath
+        ? supabase.storage.from('documents').remove([doc.filePath])
+        : Promise.resolve(),
+    ])
     setDocs((prev) => prev.filter((d) => d.id !== id))
   }
 

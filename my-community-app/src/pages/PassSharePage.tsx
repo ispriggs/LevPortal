@@ -11,7 +11,9 @@ function fmtDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-function passStatus(pass: GatePass): 'active' | 'upcoming' | 'expired' {
+function passStatus(pass: GatePass): 'active' | 'upcoming' | 'expired' | 'pending_approval' | 'declined' {
+  if (pass.extended && pass.approvalStatus === 'pending')  return 'pending_approval'
+  if (pass.extended && pass.approvalStatus === 'declined') return 'declined'
   const today = new Date().toISOString().slice(0, 10)
   if (today > pass.departureDate) return 'expired'
   if (today < pass.arrivalDate)   return 'upcoming'

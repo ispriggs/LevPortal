@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus, Share2, ChevronRight, Copy, X, Camera } from 'lucide-react'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
@@ -256,10 +256,10 @@ function CreatePassView({
     reader.readAsDataURL(file)
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!name.trim() || !phone.trim()) return
     if (extended && !idPhoto) return
-    const pass = createPass({
+    const pass = await createPass({
       type, reason,
       visitorName: name.trim(),
       email: email.trim() || undefined,
@@ -271,7 +271,7 @@ function CreatePassView({
       idPhotoUrl: extended ? idPhoto : undefined,
       createdBy: currentUser,
     })
-    onCreate(pass)
+    if (pass) onCreate(pass)
   }
 
   return (
@@ -466,7 +466,9 @@ export default function GatePage() {
   const navigate    = useNavigate()
   const user        = useAuthStore((s) => s.user)
   const currentUser = getDisplayName(user)
-  const { passes } = useGateStore()
+  const { passes, fetchPasses } = useGateStore()
+
+  useEffect(() => { fetchPasses() }, [])
 
   const myPasses = passes.filter((p) => p.createdBy === currentUser)
 

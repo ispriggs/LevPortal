@@ -12,7 +12,7 @@ import { supabase } from '@/lib/supabase'
 import { triggerGate } from '@/lib/gate'
 
 const PRIMARY = '#243d20'
-const AMBER   = '#d08a10'
+const AMBER = '#d08a10'
 const PAGE_BG = '#f0f0ec'
 
 type TileData = {
@@ -27,20 +27,20 @@ type TileData = {
 }
 
 const TILES: TileData[] = [
-  { id: 'directory',  label: 'Directory',          Icon: PhoneCall,     bg: '#e4d5b8', color: '#c9893a', path: '/directory' },
-  { id: 'voting',     label: 'Voting',              Icon: Mail,          bg: '#c5dec5', color: '#4a8a4a', path: '/voting',            ownerOnly: true },
-  { id: 'news',       label: 'News',                Icon: Newspaper,     bg: '#e8dfa0', color: '#b8a020', path: '/news' },
-  { id: 'documents',  label: 'Documents',           Icon: FileText,      bg: '#9dd0d0', color: '#1e7878', path: '/documents' },
-  { id: 'neighbours', label: 'Neighbours\nSupport', Icon: BarChart2,     bg: '#aabde0', color: '#3a50a0', path: '/neighbours-support' },
-  { id: 'events',     label: 'Events',              Icon: CalendarDays,  bg: '#585860', color: '#d8d8e0', path: '/events' },
-  { id: 'faq',        label: 'FAQ',                 Icon: MessageCircle, bg: '#b5cbc0', color: '#4e7860', path: '/faq' },
-  { id: 'gate',       label: 'Gate',                Icon: QrCode,        bg: '#98bcb0', color: '#387868', path: '/gate' },
-  { id: 'proposals',  label: 'Proposals',           Icon: ClipboardList, bg: '#d8cba8', color: '#986830', path: '/proposals',         ownerOnly: true },
-  { id: 'ae',         label: 'A&E',                 Icon: ShieldAlert,   bg: '#f5a5a5', color: '#cc2828', path: '/ae' },
-  { id: 'admin',      label: 'Admin',               Icon: Users,         bg: '#eeada0', color: '#c03828', path: '/admin', badge: 7,   ownerOnly: true },
-  { id: 'amenities',  label: 'Amenities',           Icon: Waves,         bg: '#c5b5e0', color: '#6838b8', path: '/amenities' },
-  { id: 'flora',      label: 'Flora &\nFauna',      Icon: Leaf,          bg: '#a5cf95', color: '#358028', path: '/flora-fauna' },
-  { id: 'hiking',     label: 'Hiking',              Icon: Footprints,    bg: '#95bdd8', color: '#2565a8', path: '/hiking' },
+  { id: 'directory', label: 'Directory', Icon: PhoneCall, bg: '#e4d5b8', color: '#c9893a', path: '/directory' },
+  { id: 'voting', label: 'Voting', Icon: Mail, bg: '#c5dec5', color: '#4a8a4a', path: '/voting', ownerOnly: true },
+  { id: 'news', label: 'News', Icon: Newspaper, bg: '#e8dfa0', color: '#b8a020', path: '/news' },
+  { id: 'documents', label: 'Documents', Icon: FileText, bg: '#9dd0d0', color: '#1e7878', path: '/documents' },
+  { id: 'neighbours', label: 'Neighbours\nSupport', Icon: BarChart2, bg: '#aabde0', color: '#3a50a0', path: '/neighbours-support' },
+  { id: 'events', label: 'Events', Icon: CalendarDays, bg: '#585878', color: '#d8d8e0', path: '/events' },
+  { id: 'faq', label: 'FAQ', Icon: MessageCircle, bg: '#b5cbc0', color: '#4e7860', path: '/faq' },
+  { id: 'gate', label: 'Gate', Icon: QrCode, bg: '#98bcb0', color: '#387868', path: '/gate' },
+  { id: 'proposals', label: 'Proposals', Icon: ClipboardList, bg: '#d8cba8', color: '#986830', path: '/proposals', ownerOnly: true },
+  { id: 'ae', label: 'A&E', Icon: ShieldAlert, bg: '#f5a5a5', color: '#cc2828', path: '/ae' },
+  { id: 'admin', label: 'Admin', Icon: Users, bg: '#eeada0', color: '#c03828', path: '/admin', badge: 7, ownerOnly: true },
+  { id: 'amenities', label: 'Amenities', Icon: Waves, bg: '#c5b5e0', color: '#6838b8', path: '/amenities' },
+  { id: 'flora', label: 'Flora &\nFauna', Icon: Leaf, bg: '#a5cf95', color: '#358028', path: '/flora-fauna' },
+  { id: 'hiking', label: 'Hiking', Icon: Footprints, bg: '#95bdd8', color: '#2565a8', path: '/hiking' },
 ]
 
 function Tile({
@@ -94,17 +94,17 @@ function LogoTile() {
 }
 
 export default function DashboardPage() {
-  const navigate  = useNavigate()
-  const user      = useAuthStore((s) => s.user)
-  const logout    = useAuthStore((s) => s.logout)
+  const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
+  const logout = useAuthStore((s) => s.logout)
   const displayName = getDisplayName(user)
-  const role        = getRole(user)          // 'owner' | 'renter'
-  const isRenter    = role === 'renter'
+  const role = getRole(user)          // 'owner' | 'renter'
+  const isRenter = role === 'renter'
 
   const [enterCooldown, setEnterCooldown] = useState(false)
-  const [exitCooldown,  setExitCooldown]  = useState(false)
-  const [toast,         setToast]         = useState<{ action: 'enter' | 'exit'; ok: boolean } | null>(null)
-  const [toastVisible,  setToastVisible]  = useState(false)
+  const [exitCooldown, setExitCooldown] = useState(false)
+  const [toast, setToast] = useState<{ action: 'enter' | 'exit'; ok: boolean } | null>(null)
+  const [toastVisible, setToastVisible] = useState(false)
 
   async function handleGate(action: 'enter' | 'exit') {
     // Disable the tapped button for 5 s — independent per gate
@@ -131,7 +131,7 @@ export default function DashboardPage() {
     navigate('/login', { replace: true })
   }
 
-  const mainTiles   = TILES.slice(0, 12)
+  const mainTiles = TILES.slice(0, 12)
   const bottomTiles = TILES.slice(12)
 
   return (
@@ -192,7 +192,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Main tile grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {mainTiles.map((tile) => (
             <Tile
               key={tile.id}
@@ -204,7 +204,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Bottom row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2">
           {bottomTiles.map((tile) => (
             <Tile
               key={tile.id}
@@ -247,7 +247,7 @@ export default function DashboardPage() {
           >
             {toast.ok
               ? <CheckCircle size={26} color="white" strokeWidth={2} className="flex-shrink-0" />
-              : <AlertCircle  size={26} color="white" strokeWidth={2} className="flex-shrink-0" />
+              : <AlertCircle size={26} color="white" strokeWidth={2} className="flex-shrink-0" />
             }
             <div>
               <p className="text-white font-bold text-sm leading-snug">

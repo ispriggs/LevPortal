@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Phone, Plus } from 'lucide-react'
 import DirectoryBottomSheet from '@/components/DirectoryBottomSheet'
 import AddServiceSheet, { type FormData } from '@/components/AddServiceSheet'
+import { supabase } from '@/lib/supabase'
 
 const PRIMARY = '#243d20'
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
@@ -16,23 +17,6 @@ export type Contact = {
   email?: string
   whatsapp?: string
 }
-
-// Temporary mock data — will be replaced with Supabase query
-const MOCK_SERVICES: Contact[] = [
-  { id: '1', name: 'Milton',           service: 'Taxi',             location: 'Atenas',  phone: '+506 6017 2967', whatsapp: '+50660172967' },
-  { id: '2', name: 'Louis',            service: 'Car Hire',         location: 'Atenas',  phone: '+506 6004 774' },
-  { id: '3', name: 'Jessica Scully',   service: 'Acupuncture',      location: 'LEV',     phone: '+1 484 834 5472', email: 'jessica@example.com' },
-  { id: '4', name: 'Flanders',         service: 'Electrician',      location: 'Orotina', phone: '+506 8702 4502', whatsapp: '+50687024502' },
-  { id: '5', name: 'Ian Spriggs',      service: 'Handyman',         location: 'LEV',     phone: '+506 1234 5678' },
-  { id: '6', name: 'Chantelle Spriggs',service: 'Property Manager', location: 'LEV',     phone: '+506 8765 4321', email: 'chantelle@lev.cr' },
-]
-
-const MOCK_USERS: Contact[] = [
-  { id: 'u1', name: 'Ian Spriggs',       service: 'Lot 4',  location: 'LEV', phone: '+506 1234 5678' },
-  { id: 'u2', name: 'Chantelle Spriggs', service: 'Lot 4',  location: 'LEV', phone: '+506 8765 4321', email: 'chantelle@lev.cr' },
-  { id: 'u3', name: 'Jessica Scully',    service: 'Lot 12', location: 'LEV', phone: '+1 484 834 5472', email: 'jessica@example.com' },
-  { id: 'u4', name: 'Louis Martin',      service: 'Lot 7',  location: 'LEV', phone: '+506 6004 774' },
-]
 
 function Avatar() {
   return (
@@ -77,22 +61,71 @@ export default function DirectoryPage() {
   const [mode, setMode] = useState<'services' | 'users'>('services')
   const [selected, setSelected] = useState<Contact | null>(null)
   const [addOpen, setAddOpen] = useState(false)
-  const [services, setServices] = useState<Contact[]>(MOCK_SERVICES)
+  const [services, setServices] = useState<Contact[]>([])
+  const [users, setUsers] = useState<Contact[]>([])
 
-  const sourceList = mode === 'services' ? services : MOCK_USERS
+  useEffect(() => {
+    async function load() {
+      const [{ data: svcRows }, { data: profileRows }] = await Promise.all([
+        supabase.from('directory_services').select('*').order('name'),
+        supabase.from('profiles').select('id, full_name, lot, phone').order('full_name'),
+      ])
 
-  function handleSave(data: FormData) {
-    const newContact: Contact = {
-      id: Date.now().toString(),
-      name: data.name,
-      service: data.service,
-      location: data.location,
-      phone: data.phone,
-      email: data.email || undefined,
-      whatsapp: data.whatsapp || undefined,
+      setServices(
+        (svcRows ?? []).map((r) => ({
+          id:       r.id,
+          name:     r.name,
+          service:  r.service,
+          location: r.location,
+          phone:    r.phone,
+          email:    r.email ?? undefined,
+          whatsapp: r.whatsapp ?? undefined,
+        }))
+      )
+
+      setUsers(
+        (profileRows ?? []).map((r) => ({
+          id:       r.id,
+          name:     r.full_name,
+          service:  r.lot ? `Lot ${r.lot}` : 'Resident',
+          location: 'LEV',
+          phone:    r.phone ?? '—',
+        }))
+      )
     }
-    setServices((prev) => [...prev, newContact])
+    load()
+  }, [])
+
+  async function handleSave(data: FormData) {
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: row } = await supabase
+      .from('directory_services')
+      .insert({
+        name:       data.name,
+        service:    data.service,
+        location:   data.location,
+        phone:      data.phone,
+        email:      data.email || null,
+        whatsapp:   data.whatsapp || null,
+        created_by: user?.id ?? null,
+      })
+      .select()
+      .single()
+
+    if (row) {
+      setServices((prev) => [...prev, {
+        id:       row.id,
+        name:     row.name,
+        service:  row.service,
+        location: row.location,
+        phone:    row.phone,
+        email:    row.email ?? undefined,
+        whatsapp: row.whatsapp ?? undefined,
+      }])
+    }
   }
+
+  const sourceList = mode === 'services' ? services : users
 
   const filtered = useMemo(() => {
     return sourceList.filter((c) =>

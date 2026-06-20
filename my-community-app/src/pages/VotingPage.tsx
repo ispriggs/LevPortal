@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, User, Calendar, MessageCircle, Plus, Check, BarChart2 } from 'lucide-react'
-import { useVotingStore } from '@/store/votingStore'
 import { useAuthStore, getDisplayName } from '@/store/authStore'
 import CreatePollSheet, { type CreatePollData, type PollAudience } from '@/components/CreatePollSheet'
 import PollCommentsSheet from '@/components/PollCommentsSheet'
+import { supabase } from '@/lib/supabase'
 
 const PRIMARY = '#243d20'
 
@@ -21,6 +21,12 @@ export type Poll = {
   comments: Comment[]
 }
 
+async function fetchNameMap(uids: string[]): Promise<Record<string, string>> {
+  if (!uids.length) return {}
+  const { data } = await supabase.from('profiles').select('id, full_name').in('id', uids)
+  return Object.fromEntries((data ?? []).map((p) => [p.id, p.full_name]))
+}
+
 function isPollActive(p: Poll) {
   return new Date(p.endsAt) > new Date()
 }
@@ -29,31 +35,11 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-const INITIAL_POLLS: Poll[] = [
-  {
-    id: '1',
-    title: 'Low Ropes Course',
-    description:
-      'Proposal to build a low ropes kids course on vacant lot #39 — creating a safe, engaging outdoor space where children can climb, balance, and develop confidence, coordination, and teamwork through fun physical challenges. Budget of $5000 for phase 1. Please see proposal for full details.',
-    createdBy: 'Ian Spriggs',
-    endsAt: '2026-04-18',
-    audience: 'owners_only',
-    options: [
-      { id: 'a', text: 'Yes - I support building the ropes course',    votes: 1 },
-      { id: 'b', text: 'No - I do not support building the course', votes: 1 },
-    ],
-    comments: [
-      { id: 'c1', author: 'Jessica Scully', text: 'Great idea! The kids will love it.', createdAt: new Date(Date.now() - 3600000).toISOString() },
-    ],
-  },
-]
-
 // ── Poll card ──────────────────────────────────────────────────────────────
 
 function PollCard({
   poll,
   myVote,
-  userRole,
   onVote,
   onCommentOpen,
 }: {
@@ -222,15 +208,89 @@ export default function VotingPage() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const displayName = getDisplayName(user)
-  const { votes, castVote } = useVotingStore()
 
-  const [polls, setPolls] = useState<Poll[]>(INITIAL_POLLS)
+  const [polls, setPolls] = useState<Poll[]>([])
+  const [myVotes, setMyVotes] = useState<Record<string, string>>({})
   const [createOpen, setCreateOpen] = useState(false)
   const [commentPoll, setCommentPoll] = useState<Poll | null>(null)
 
-  function handleVote(pollId: string, optionId: string) {
-    if (votes[pollId]) return                        // already voted
-    castVote(pollId, optionId)                       // persist choice
+  useEffect(() => {
+    async function load() {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) return
+
+      const [
+        { data: pollRows },
+        { data: optionRows },
+        { data: voteRows },
+        { data: commentRows },
+      ] = await Promise.all([
+        supabase.from('polls').select('*').order('created_at', { ascending: false }),
+        supabase.from('poll_options').select('*').order('sort_order'),
+        supabase.from('poll_votes').select('*'),
+        supabase.from('poll_comments').select('*').order('created_at', { ascending: true }),
+      ])
+
+      if (!pollRows) return
+
+      const options  = optionRows  ?? []
+      const votes    = voteRows    ?? []
+      const comments = commentRows ?? []
+
+      const uids = [...new Set([
+        ...pollRows.map((p) => p.created_by),
+        ...comments.map((c) => c.author_id),
+      ].filter(Boolean))]
+      const nameMap = await fetchNameMap(uids)
+
+      // Build myVotes map from DB
+      const myVotesMap: Record<string, string> = {}
+      votes
+        .filter((v) => v.user_id === authUser.id)
+        .forEach((v) => { myVotesMap[v.poll_id] = v.option_id })
+      setMyVotes(myVotesMap)
+
+      // Count votes per option
+      const voteCounts: Record<string, number> = {}
+      votes.forEach((v) => {
+        voteCounts[v.option_id] = (voteCounts[v.option_id] ?? 0) + 1
+      })
+
+      setPolls(pollRows.map((p) => ({
+        id:          p.id,
+        title:       p.title,
+        description: p.description,
+        createdBy:   nameMap[p.created_by] ?? 'Unknown',
+        endsAt:      p.ends_at,
+        audience:    p.audience as PollAudience,
+        options:     options
+          .filter((o) => o.poll_id === p.id)
+          .map((o) => ({ id: o.id, text: o.text, votes: voteCounts[o.id] ?? 0 })),
+        comments:    comments
+          .filter((c) => c.poll_id === p.id)
+          .map((c) => ({
+            id:        c.id,
+            author:    nameMap[c.author_id] ?? 'Unknown',
+            text:      c.text,
+            createdAt: c.created_at,
+          })),
+      })))
+    }
+    load()
+  }, [])
+
+  async function handleVote(pollId: string, optionId: string) {
+    if (myVotes[pollId]) return
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) return
+
+    await supabase.from('poll_votes').insert({
+      poll_id:   pollId,
+      option_id: optionId,
+      user_id:   authUser.id,
+    })
+
+    setMyVotes((prev) => ({ ...prev, [pollId]: optionId }))
     setPolls((prev) =>
       prev.map((p) =>
         p.id !== pollId ? p : {
@@ -243,33 +303,69 @@ export default function VotingPage() {
     )
   }
 
-  function handleCreatePoll(data: CreatePollData) {
+  async function handleCreatePoll(data: CreatePollData) {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) return
+
+    const { data: poll } = await supabase
+      .from('polls')
+      .insert({
+        title:       data.title,
+        description: data.description,
+        created_by:  authUser.id,
+        ends_at:     data.endsAt,
+        audience:    data.audience,
+      })
+      .select()
+      .single()
+
+    if (!poll) return
+
+    const optionInserts = data.options.map((text, i) => ({
+      poll_id:    poll.id,
+      text,
+      sort_order: i,
+    }))
+    const { data: optionRows } = await supabase
+      .from('poll_options')
+      .insert(optionInserts)
+      .select()
+
     const newPoll: Poll = {
-      id: Date.now().toString(),
-      title: data.title,
-      description: data.description,
-      createdBy: displayName,
-      endsAt: data.endsAt,
-      audience: data.audience,
-      options: data.options.map((text, i) => ({ id: String(i), text, votes: 0 })),
-      comments: [],
+      id:          poll.id,
+      title:       poll.title,
+      description: poll.description,
+      createdBy:   displayName,
+      endsAt:      poll.ends_at,
+      audience:    poll.audience as PollAudience,
+      options:     (optionRows ?? []).map((o) => ({ id: o.id, text: o.text, votes: 0 })),
+      comments:    [],
     }
     setPolls((prev) => [newPoll, ...prev])
   }
 
-  function handleAddComment(pollId: string, text: string) {
+  async function handleAddComment(pollId: string, text: string) {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) return
+
+    const { data: row } = await supabase
+      .from('poll_comments')
+      .insert({ poll_id: pollId, author_id: authUser.id, text })
+      .select()
+      .single()
+
+    if (!row) return
     const comment: Comment = {
-      id: Date.now().toString(),
-      author: displayName,
-      text,
-      createdAt: new Date().toISOString(),
+      id:        row.id,
+      author:    displayName,
+      text:      row.text,
+      createdAt: row.created_at,
     }
     setPolls((prev) =>
       prev.map((p) =>
         p.id !== pollId ? p : { ...p, comments: [...p.comments, comment] }
       )
     )
-    // Keep comment sheet open with updated poll
     setCommentPoll((prev) =>
       prev?.id === pollId ? { ...prev, comments: [...prev.comments, comment] } : prev
     )
@@ -314,7 +410,7 @@ export default function VotingPage() {
             <PollCard
               key={poll.id}
               poll={poll}
-              myVote={votes[poll.id]}
+              myVote={myVotes[poll.id]}
               onVote={handleVote}
               onCommentOpen={setCommentPoll}
             />

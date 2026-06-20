@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { supabase } from '@/lib/supabase'
 
 export type TicketCategory = 'fault' | 'request' | 'complaint' | 'idea'
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent'
@@ -41,149 +41,175 @@ export type SubmitTicketData = {
   attachmentUrl?: string
 }
 
-// ── Sample data ───────────────────────────────────────────────────────────
+async function fetchNameMap(uids: string[]): Promise<Record<string, string>> {
+  if (!uids.length) return {}
+  const { data } = await supabase.from('profiles').select('id, full_name').in('id', uids)
+  return Object.fromEntries((data ?? []).map((p) => [p.id, p.full_name]))
+}
 
-const SAMPLE: Ticket[] = [
-  {
-    id: 't1',
-    ticketNumber: 'TKT-0001',
-    category: 'fault',
-    subject: 'Pool pump broken',
-    description: 'The main pool pump stopped working yesterday morning. The pool is completely unusable and we have guests visiting this weekend.',
-    priority: 'high',
-    status: 'open',
-    submittedBy: 'Jessica Scully',
-    unit: '5',
-    createdAt: '2026-06-19T07:00:00Z',
-    history: [],
-  },
-  {
-    id: 't2',
-    ticketNumber: 'TKT-0002',
-    category: 'fault',
-    subject: 'Streetlight out – path to Lot 15',
-    description: 'The path light near lot 15 has been out for 3 nights. It is a real safety concern when walking at night and we have children in the community.',
-    priority: 'medium',
-    status: 'in_progress',
-    submittedBy: 'Carlos Mendez',
-    unit: '12',
-    createdAt: '2026-06-18T20:00:00Z',
-    history: [
-      { id: 'h1', type: 'status_change', actor: 'Admin', isAdmin: true, fromStatus: 'open', toStatus: 'in_progress', createdAt: '2026-06-19T08:00:00Z' },
-      { id: 'h2', type: 'comment', actor: 'Admin', isAdmin: true, text: 'We have contacted the electrician and they will be on site tomorrow morning to replace the bulb and check the wiring.', createdAt: '2026-06-19T08:05:00Z' },
-    ],
-  },
-  {
-    id: 't3',
-    ticketNumber: 'TKT-0003',
-    category: 'complaint',
-    subject: 'Noise complaint – Lot 8',
-    description: 'There has been repeated loud music after 11pm on weekends from Lot 8. I have spoken to the resident directly but nothing has changed over the past 3 weekends.',
-    priority: 'low',
-    status: 'open',
-    submittedBy: 'Maria Santos',
-    unit: '3',
-    createdAt: '2026-06-17T23:00:00Z',
-    history: [],
-  },
-  {
-    id: 't4',
-    ticketNumber: 'TKT-0004',
-    category: 'request',
-    subject: 'Grass cutting overdue in common area',
-    description: 'The grass in the main common area near the entrance has not been cut in over 3 weeks and is becoming very overgrown.',
-    priority: 'low',
-    status: 'resolved',
-    submittedBy: 'Ian Spriggs',
-    unit: '7',
-    createdAt: '2026-06-10T09:00:00Z',
-    history: [
-      { id: 'h3', type: 'status_change', actor: 'Admin', isAdmin: true, fromStatus: 'open', toStatus: 'in_progress', createdAt: '2026-06-11T08:00:00Z' },
-      { id: 'h4', type: 'comment', actor: 'Admin', isAdmin: true, text: 'The gardening team has been assigned and will take care of the common area this Thursday.', createdAt: '2026-06-11T08:10:00Z' },
-      { id: 'h5', type: 'comment', actor: 'Ian Spriggs', isAdmin: false, text: 'Thank you for the quick response!', createdAt: '2026-06-11T09:00:00Z' },
-      { id: 'h6', type: 'status_change', actor: 'Admin', isAdmin: true, fromStatus: 'in_progress', toStatus: 'resolved', createdAt: '2026-06-12T16:00:00Z' },
-      { id: 'h7', type: 'comment', actor: 'Admin', isAdmin: true, text: 'The common area has been fully cut and tidied. Thank you for bringing this to our attention!', createdAt: '2026-06-12T16:05:00Z' },
-    ],
-  },
-  {
-    id: 't5',
-    ticketNumber: 'TKT-0005',
-    category: 'idea',
-    subject: 'Install a physical community notice board',
-    description: 'A physical notice board near the main entrance where residents can post community announcements, lost and found, local services, and event flyers would be a great addition.',
-    priority: 'low',
-    status: 'open',
-    submittedBy: 'Ian Spriggs',
-    unit: '7',
-    createdAt: '2026-06-15T14:00:00Z',
-    history: [],
-  },
-]
+function historyFromRow(row: any, nameMap: Record<string, string>): TicketHistoryEntry {
+  return {
+    id:          row.id,
+    type:        row.type as 'status_change' | 'comment',
+    actor:       nameMap[row.actor_id] ?? 'Unknown',
+    isAdmin:     row.is_admin,
+    text:        row.text ?? undefined,
+    fromStatus:  row.from_status ?? undefined,
+    toStatus:    row.to_status ?? undefined,
+    createdAt:   row.created_at,
+  }
+}
 
-// ── Store ─────────────────────────────────────────────────────────────────
+function ticketFromRow(
+  row: any,
+  nameMap: Record<string, string>,
+  historyRows: any[]
+): Ticket {
+  return {
+    id:            row.id,
+    ticketNumber:  row.ticket_number,
+    category:      row.category as TicketCategory,
+    subject:       row.subject,
+    description:   row.description,
+    priority:      row.priority as TicketPriority,
+    status:        row.status as TicketStatus,
+    submittedBy:   nameMap[row.submitted_by] ?? 'Unknown',
+    unit:          row.unit,
+    createdAt:     row.created_at,
+    attachmentUrl: row.attachment_url ?? undefined,
+    history:       historyRows
+      .filter((h) => h.ticket_id === row.id)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+      .map((h) => historyFromRow(h, nameMap)),
+  }
+}
 
 type TicketsStore = {
   tickets: Ticket[]
-  nextNumber: number
-  submitTicket: (data: SubmitTicketData) => string   // returns ticket number
-  updateStatus: (ticketId: string, newStatus: TicketStatus, actor: string) => void
-  addComment: (ticketId: string, actor: string, text: string, isAdmin: boolean) => void
+  loading: boolean
+  fetchTickets:  () => Promise<void>
+  submitTicket:  (data: SubmitTicketData) => Promise<string | null>
+  updateStatus:  (ticketId: string, newStatus: TicketStatus, actor: string) => Promise<void>
+  addComment:    (ticketId: string, actor: string, text: string, isAdmin: boolean) => Promise<void>
 }
 
-export const useTicketsStore = create<TicketsStore>()(
-  persist(
-    (set, get) => ({
-      tickets: SAMPLE,
-      nextNumber: 6,
+export const useTicketsStore = create<TicketsStore>()((set, get) => ({
+  tickets: [],
+  loading: false,
 
-      submitTicket: (data) => {
-        const num = get().nextNumber
-        const ticketNumber = `TKT-${String(num).padStart(4, '0')}`
-        const ticket: Ticket = {
-          id: `${Date.now()}`,
-          ticketNumber,
-          ...data,
-          status: 'open',
-          createdAt: new Date().toISOString(),
-          history: [],
-        }
-        set((s) => ({ tickets: [ticket, ...s.tickets], nextNumber: s.nextNumber + 1 }))
-        return ticketNumber
-      },
+  fetchTickets: async () => {
+    set({ loading: true })
+    const [{ data: rows }, { data: histRows }] = await Promise.all([
+      supabase.from('tickets').select('*').order('created_at', { ascending: false }),
+      supabase.from('ticket_history').select('*').order('created_at', { ascending: true }),
+    ])
+    if (!rows) { set({ loading: false }); return }
 
-      updateStatus: (ticketId, newStatus, actor) =>
-        set((s) => ({
-          tickets: s.tickets.map((t) => {
-            if (t.id !== ticketId) return t
-            const entry: TicketHistoryEntry = {
-              id: `${Date.now()}h`,
-              type: 'status_change',
-              actor,
-              isAdmin: true,
-              fromStatus: t.status,
-              toStatus: newStatus,
-              createdAt: new Date().toISOString(),
-            }
-            return { ...t, status: newStatus, history: [...t.history, entry] }
-          }),
-        })),
+    const hist = histRows ?? []
+    const uids = [
+      ...new Set([
+        ...rows.map((r) => r.submitted_by),
+        ...hist.map((h) => h.actor_id),
+      ].filter(Boolean))
+    ]
+    const nameMap = await fetchNameMap(uids)
+    set({ tickets: rows.map((r) => ticketFromRow(r, nameMap, hist)), loading: false })
+  },
 
-      addComment: (ticketId, actor, text, isAdmin) =>
-        set((s) => ({
-          tickets: s.tickets.map((t) => {
-            if (t.id !== ticketId) return t
-            const entry: TicketHistoryEntry = {
-              id: `${Date.now()}c`,
-              type: 'comment',
-              actor,
-              isAdmin,
-              text,
-              createdAt: new Date().toISOString(),
-            }
-            return { ...t, history: [...t.history, entry] }
-          }),
-        })),
-    }),
-    { name: 'lev-tickets' }
-  )
-)
+  submitTicket: async (data) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data: row, error } = await supabase
+      .from('tickets')
+      .insert({
+        category:       data.category,
+        subject:        data.subject,
+        description:    data.description,
+        priority:       data.priority,
+        status:         'open',
+        submitted_by:   user.id,
+        unit:           data.unit,
+        attachment_url: data.attachmentUrl ?? null,
+      })
+      .select()
+      .single()
+
+    if (error || !row) return null
+
+    const ticket = ticketFromRow(row, { [user.id]: data.submittedBy }, [])
+    set((s) => ({ tickets: [ticket, ...s.tickets] }))
+    return row.ticket_number as string
+  },
+
+  updateStatus: async (ticketId, newStatus, actor) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const ticket = get().tickets.find((t) => t.id === ticketId)
+    const fromStatus = ticket?.status
+
+    const { data: hRow } = await supabase
+      .from('ticket_history')
+      .insert({
+        ticket_id:   ticketId,
+        type:        'status_change',
+        actor_id:    user.id,
+        is_admin:    true,
+        from_status: fromStatus ?? null,
+        to_status:   newStatus,
+      })
+      .select()
+      .single()
+
+    await supabase.from('tickets').update({ status: newStatus }).eq('id', ticketId)
+
+    if (!hRow) return
+    const entry: TicketHistoryEntry = {
+      id:          hRow.id,
+      type:        'status_change',
+      actor,
+      isAdmin:     true,
+      fromStatus,
+      toStatus:    newStatus,
+      createdAt:   hRow.created_at,
+    }
+    set((s) => ({
+      tickets: s.tickets.map((t) =>
+        t.id !== ticketId ? t : { ...t, status: newStatus, history: [...t.history, entry] }
+      ),
+    }))
+  },
+
+  addComment: async (ticketId, actor, text, isAdmin) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data: hRow } = await supabase
+      .from('ticket_history')
+      .insert({
+        ticket_id: ticketId,
+        type:      'comment',
+        actor_id:  user.id,
+        is_admin:  isAdmin,
+        text,
+      })
+      .select()
+      .single()
+
+    if (!hRow) return
+    const entry: TicketHistoryEntry = {
+      id:        hRow.id,
+      type:      'comment',
+      actor,
+      isAdmin,
+      text,
+      createdAt: hRow.created_at,
+    }
+    set((s) => ({
+      tickets: s.tickets.map((t) =>
+        t.id !== ticketId ? t : { ...t, history: [...t.history, entry] }
+      ),
+    }))
+  },
+}))
